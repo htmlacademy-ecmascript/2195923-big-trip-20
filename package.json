@@ -23,7 +23,7 @@
   "engines": {
     "node": "18"
   },
-  "browserlist": [
+  "browserslist": [
     "last 2 versions",
     "not dead",
     "not ie <= 11",
