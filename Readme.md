@@ -1,7 +1,7 @@
 # Проект «Большое путешествие»
 
 * Студент: [Dmitriy Lutsishin](https://up.htmlacademy.ru/ecmascript/20/user/2195923).
-* Наставник: `Неизвестно`.
+* Наставник: [Владимир Шишлянников](https://htmlacademy.ru/profile/id1082173).
 
 ---
 
