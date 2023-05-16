@@ -66,22 +66,27 @@ const descriptions = [
 
 const offers = [
   {
+    id: Math.random(),
     title: 'Add luggage',
     price: getRandomInteger(0, 100),
   },
   {
+    id: Math.random(),
     title: 'Switch to comfort',
     price: getRandomInteger(0, 100),
   },
   {
+    id: Math.random(),
     title: 'Add meal',
     price: getRandomInteger(0, 100),
   },
   {
+    id: Math.random(),
     title: 'Choose seats',
     price: getRandomInteger(0, 100),
   },
   {
+    id: Math.random(),
     title: 'Travel by train',
     price: getRandomInteger(0, 100),
   },
@@ -92,12 +97,11 @@ const generateRoutePointType = () => routePointTypes[getRandomInteger(0, routePo
 const generateOffers = () => {
   routePointTypes.forEach((routePointType) => {
     const offer = {};
-    offer.id = Math.random();
     offer.type = routePointType;
-    offer.offer = [];
+    offer.offers = [];
     for (let i = 0; i < offers.length; i++) {
       if (getRandomInteger()) {
-        offer.offer.push(offers[i]);
+        offer.offers.push(offers[i]);
       }
     }
     offerArray.push(offer);
@@ -144,12 +148,12 @@ const generateDate = () => {
 
 const getRandomDestinationId = () => destinations[getRandomInteger(0, destinationNames.length - 1)].id;
 
-const getOffersId = (type, isChecked = true) => {
+const getOffersId = (type) => {
   const checkedOffersId = [];
   for (const offerObject of offerArray) {
     if (offerObject.type === type) {
-      offerObject.offer.forEach((offer) => {
-        if (!isChecked || getRandomInteger(0, 1)) {
+      offerObject.offers.forEach((offer) => {
+        if (getRandomInteger(0, 1)) {
           checkedOffersId.push(offer.id);
         }
       });
@@ -163,6 +167,7 @@ const getRoutePointTypes = () => routePointTypes;
 const getDestinationNames = () => destinationNames;
 
 const getDestinations = () => destinations;
+const getOffers = () => offerArray;
 
 generateDestination();
 generateOffers();
@@ -184,4 +189,4 @@ const generatePoint = () => {
   };
 };
 
-export { generatePoint, getRoutePointTypes, getDestinationNames, getDestinations, getOffersId };
+export { generatePoint, getRoutePointTypes, getDestinationNames, getDestinations, getOffersId, getOffers };
