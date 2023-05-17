@@ -1,17 +1,17 @@
 import { createElement } from '../render.js';
 import { DateFormat, Mode } from '../const.js';
 import { formatDate } from '../utils.js';
-import { getRoutePointTypes, getDestinationNames, getDestinations } from '../mock/mock.js';
+import { DestinationNames, RoutePointTypes } from '../mock/const.js';
 
 const blankPoint = {
   basePrice: 0,
   dateFrom: new Date(),
   dateTo: new Date(),
-  destination: getDestinations()[0],
+  destination: DestinationNames[0],
   id: 0,
   isFavorite: false,
   offers: [],
-  type: getRoutePointTypes()[0],
+  type: RoutePointTypes[0],
 };
 
 const createDescriptionOfPointInTemplate = (description) => `<p class="event__destination-description">${description}</p>`;
@@ -25,10 +25,8 @@ const createListOfPicturesInTemplate = (pictures) => {
 };
 
 const createRoutePointTypesInTemplate = (type) => {
-  const routePointTypes = getRoutePointTypes();
   let list = '';
-
-  for (const point of routePointTypes) {
+  for (const point of RoutePointTypes) {
     const pointWithFirstCapitalLetter = point[0].toUpperCase() + point.slice(1);
     list += `<div class="event__type-item">
       <input id="event-type-${point}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${point}" ${type === point ? 'checked' : ''}>
@@ -39,9 +37,8 @@ const createRoutePointTypesInTemplate = (type) => {
 };
 
 const createDestinationNamesInTemplate = () => {
-  const destinationNames = getDestinationNames();
   let list = '';
-  for (const name of destinationNames) {
+  for (const name of DestinationNames) {
     list += `<option value="${name}"></option>`;
   }
   return list;

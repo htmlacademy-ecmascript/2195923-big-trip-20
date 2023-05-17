@@ -1,21 +1,11 @@
-import { generatePoint, getDestinations, getOffers } from '../mock/mock.js';
+import { getPoint } from '../mock/point-mock.js';
 
 const POINT_COUNT = 4;
 
 export default class PointsModel {
-  points = Array.from({length: POINT_COUNT}, generatePoint);
-  destinations = getDestinations();
-  offers = getOffers();
+  points = Array.from({length: POINT_COUNT}, getPoint);
 
   getPoints() {
     return this.points;
-  }
-
-  getDestinations() {
-    return this.destinations;
-  }
-
-  getOffers() {
-    return this.offers;
   }
 }

@@ -21,7 +21,7 @@ const createListOffersInTemplate = (offers) => {
   return eventList.outerHTML;
 };
 
-function createEventTripTemplate(point, destination, offers) {
+function createPointTemplate(point, destination, offers) {
   const { basePrice, dateFrom, dateTo, isFavorite, type } = point;
   const { name } = destination;
   const listOffers = createListOffersInTemplate(offers);
@@ -61,7 +61,7 @@ function createEventTripTemplate(point, destination, offers) {
   );
 }
 
-export default class EventTripView {
+export default class PointView {
   constructor({point, destination, offers}) {
     this.point = point;
     this.destination = destination;
@@ -69,7 +69,7 @@ export default class EventTripView {
   }
 
   getTemplate() {
-    return createEventTripTemplate(this.point, this.destination, this.offers);
+    return createPointTemplate(this.point, this.destination, this.offers);
   }
 
   getElement() {

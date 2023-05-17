@@ -1,37 +1,41 @@
-import EventsListView from '../view/events-list-view.js';
-import EventTripView from '../view/event-trip-view.js';
+import PointsListView from '../view/points-list-view.js';
+import PointView from '../view/point-view.js';
 import CreationOrEditingView from '../view/creation-or-editing-view.js';
 import { render } from '../render.js';
 import { Mode } from '../const.js';
 
-export default class EventsListPresenter {
-  eventsListComponent = new EventsListView();
+export default class PointsListPresenter {
+  pointsListComponent = new PointsListView();
 
-  constructor(eventsListContainer, pointsModel) {
-    this.eventsListContainer = eventsListContainer;
+  constructor(pointsListContainer, models) {
+    this.pointsListContainer = pointsListContainer;
+
+    const {pointsModel, destinationsModel, offersModel} = models;
     this.pointsModel = pointsModel;
+    this.destinationsModel = destinationsModel;
+    this.offersModel = offersModel;
   }
 
   init() {
     this.routePoints = [...this.pointsModel.getPoints()];
-    this.destinations = [...this.pointsModel.getDestinations()];
-    this.offers = [...this.pointsModel.getOffers()];
+    this.destinations = [...this.destinationsModel.getDestinations()];
+    this.offers = [...this.offersModel.getOffers()];
 
-    render(this.eventsListComponent, this.eventsListContainer);
+    render(this.pointsListComponent, this.pointsListContainer);
 
     let destination = this.destinations.find((destinationElement) => destinationElement.id === this.routePoints[0].destination);
     let offersForType = this.offers.find((offer) => offer.type === this.routePoints[0].type);
-    render(new CreationOrEditingView(destination, offersForType, this.routePoints[0], Mode.EDIT), this.eventsListComponent.getElement());
+    render(new CreationOrEditingView(destination, offersForType, this.routePoints[0], Mode.EDIT), this.pointsListComponent.getElement());
 
     for (let i = 1; i < this.routePoints.length; i++) {
       destination = this.destinations.find((destinationElement) => destinationElement.id === this.routePoints[i].destination);
-      const checkedOffers = [];
       offersForType = this.offers.find((offer) => offer.type === this.routePoints[i].type);
 
+      const checkedOffers = [];
       this.routePoints[i].offers.forEach((routePointsOfferId) => {
         checkedOffers.push(offersForType.offers.find((offerElement) => offerElement.id === routePointsOfferId));
       });
-      render(new EventTripView({point: this.routePoints[i], destination: destination, offers: checkedOffers}), this.eventsListComponent.getElement());
+      render(new PointView({point: this.routePoints[i], destination: destination, offers: checkedOffers}), this.pointsListComponent.getElement());
     }
   }
 }
