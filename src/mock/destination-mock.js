@@ -18,7 +18,7 @@ const generateDescription = (min, max) => {
 const generatePictures = () => {
   const numberOfPictures = getRandomInteger(1, 5);
   return new Array(numberOfPictures).fill().map(
-    () => ({ src: `https://loremflickr.com/248/152?random=${Math.random()}`, description: generateDescription(1, 1) }));
+    () => ({ src: `https://loremflickr.com/248/152?random=${nanoid()}`, description: generateDescription(1, 1) }));
 };
 
 const generateDestinations = () => {
