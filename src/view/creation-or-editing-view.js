@@ -1,17 +1,17 @@
 import { DateFormat, Mode } from '../const.js';
 import { formatDate } from '../utils.js';
-import { DestinationNames, RoutePointTypes } from '../mock/const.js';
+import { destinationNames, routePointTypes } from '../mock/const.js';
 import AbstractView from '../framework/view/abstract-view.js';
 
 const blankPoint = {
   basePrice: 0,
   dateFrom: new Date(),
   dateTo: new Date(),
-  destination: DestinationNames[0],
+  destination: destinationNames[0],
   id: 0,
   isFavorite: false,
   offers: [],
-  type: RoutePointTypes[0],
+  type: routePointTypes[0],
 };
 
 const createDescriptionOfPointInTemplate = (description) => `<p class="event__destination-description">${description}</p>`;
@@ -26,7 +26,7 @@ const createListOfPicturesInTemplate = (pictures) => {
 
 const createRoutePointTypesInTemplate = (type) => {
   let list = '';
-  for (const point of RoutePointTypes) {
+  for (const point of routePointTypes) {
     const pointWithFirstCapitalLetter = point[0].toUpperCase() + point.slice(1);
     list += `<div class="event__type-item">
       <input id="event-type-${point}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${point}" ${type === point ? 'checked' : ''}>
@@ -38,7 +38,7 @@ const createRoutePointTypesInTemplate = (type) => {
 
 const createDestinationNamesInTemplate = () => {
   let list = '';
-  for (const name of DestinationNames) {
+  for (const name of destinationNames) {
     list += `<option value="${name}"></option>`;
   }
   return list;

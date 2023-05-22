@@ -30,18 +30,7 @@ export default class PointsListPresenter {
     this.#destinations = [...this.#destinationsModel.destinations];
     this.#offers = [...this.#offersModel.offers];
 
-    render(this.#pointsListComponent, this.#pointsListContainer);
-
-    for (let i = 1; i < this.#routePoints.length; i++) {
-      const destination = this.#destinations.find((destinationElement) => destinationElement.id === this.#routePoints[i].destination);
-      const offersForType = this.#offers.find((offer) => offer.type === this.#routePoints[i].type);
-
-      const checkedOffers = [];
-      this.#routePoints[i].offers.forEach((routePointsOfferId) => {
-        checkedOffers.push(offersForType.offers.find((offerElement) => offerElement.id === routePointsOfferId));
-      });
-      this.#renderPoint({point: this.#routePoints[i], destination: destination, offers: checkedOffers});
-    }
+    this.#renderPointList();
   }
 
   #renderPoint({point, destination, offers}) {
@@ -85,5 +74,20 @@ export default class PointsListPresenter {
     }
 
     render(pointComponent, this.#pointsListComponent.element);
+  }
+
+  #renderPointList() {
+    render(this.#pointsListComponent, this.#pointsListContainer);
+
+    for (let i = 1; i < this.#routePoints.length; i++) {
+      const destination = this.#destinations.find((destinationElement) => destinationElement.id === this.#routePoints[i].destination);
+      const offersForType = this.#offers.find((offer) => offer.type === this.#routePoints[i].type);
+
+      const checkedOffers = [];
+      this.#routePoints[i].offers.forEach((routePointsOfferId) => {
+        checkedOffers.push(offersForType.offers.find((offerElement) => offerElement.id === routePointsOfferId));
+      });
+      this.#renderPoint({point: this.#routePoints[i], destination: destination, offers: checkedOffers});
+    }
   }
 }

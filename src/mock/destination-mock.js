@@ -1,16 +1,16 @@
 import { nanoid } from 'nanoid';
-import { DestinationNames, Descriptions } from './const.js';
+import { destinationNames, descriptions } from './const.js';
 import { getRandomInteger } from './util.js';
 
 const mockDestinations = [];
 
-const getRandomDestinationId = () => mockDestinations[getRandomInteger(0, DestinationNames.length - 1)].id;
+const getRandomDestinationId = () => mockDestinations[getRandomInteger(0, destinationNames.length - 1)].id;
 
 const generateDescription = (min, max) => {
   let description = '';
   const numberOfSentencesInDescription = getRandomInteger(min, max);
   for (let i = 0; i < numberOfSentencesInDescription; i++) {
-    description += Descriptions[getRandomInteger(0, Descriptions.length - 1)];
+    description += descriptions[getRandomInteger(0, descriptions.length - 1)];
   }
   return description;
 };
@@ -22,7 +22,7 @@ const generatePictures = () => {
 };
 
 const generateDestinations = () => {
-  DestinationNames.forEach((destinationName) => {
+  destinationNames.forEach((destinationName) => {
     const destination = {
       id: nanoid(),
       name: destinationName,

@@ -1,10 +1,10 @@
 import { nanoid } from 'nanoid';
 import { getRandomInteger, generateDate } from './util.js';
-import { RoutePointTypes } from './const.js';
+import { routePointTypes } from './const.js';
 import { getRandomDestinationId } from './destination-mock.js';
 import { getOffersId } from './offer-mock.js';
 
-const generateRoutePointType = () => RoutePointTypes[getRandomInteger(0, RoutePointTypes.length - 1)];
+const generateRoutePointType = () => routePointTypes[getRandomInteger(0, routePointTypes.length - 1)];
 
 const getPoint = () => {
   const routePointType = generateRoutePointType();
