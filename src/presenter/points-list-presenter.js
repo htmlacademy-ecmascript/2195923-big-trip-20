@@ -11,9 +11,9 @@ export default class PointsListPresenter {
   #destinationsModel = null;
   #offersModel = null;
 
-  #routePoints = null;
-  #destinations = null;
-  #offers = null;
+  #routePoints = [];
+  #destinations = [];
+  #offers = [];
 
 
   constructor(pointsListContainer, models) {
@@ -44,7 +44,12 @@ export default class PointsListPresenter {
       this.#routePoints[i].offers.forEach((routePointsOfferId) => {
         checkedOffers.push(offersForType.offers.find((offerElement) => offerElement.id === routePointsOfferId));
       });
-      render(new PointView({point: this.#routePoints[i], destination: destination, offers: checkedOffers}), this.#pointsListComponent.element);
+      this.#renderPoint({point: this.#routePoints[i], destination: destination, offers: checkedOffers});
     }
+  }
+
+  #renderPoint(data) {
+    const pointComponent = new PointView(data);
+    render(pointComponent, this.#pointsListComponent.element);
   }
 }

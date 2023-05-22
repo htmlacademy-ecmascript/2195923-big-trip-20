@@ -24,7 +24,11 @@ export default class TripInfoPresenter {
     this.#routePoints = [...this.#pointsModel.getPoints()];
     this.#destinations = [...this.#destinationsModel.getDestinations()];
     this.#offers = [...this.#offersModel.getOffers()];
+    this.#renderTripInfo({points: this.#routePoints, destinations: this.#destinations, offers: this.#offers});
+  }
 
-    render(new TripInfoView(this.#routePoints, this.#destinations, this.#offers), this.#tripInfoContainer, RenderPosition.AFTERBEGIN);
+  #renderTripInfo(data) {
+    const tripInfoComponent = new TripInfoView(data);
+    render(tripInfoComponent, this.#tripInfoContainer, RenderPosition.AFTERBEGIN);
   }
 }
