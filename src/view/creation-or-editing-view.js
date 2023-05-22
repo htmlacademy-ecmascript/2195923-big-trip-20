@@ -93,7 +93,7 @@ const createSectionOfDestinationInTemplate = (destination) => {
 };
 
 
-function createEditEventTemplate(destination, offersForType, point, mode) {
+function createEditPointTemplate(destination, offersForType, point, mode) {
   const { basePrice, dateFrom, dateTo, offers, type } = point;
   const { name } = destination;
   const isEdit = mode === Mode.EDIT;
@@ -159,16 +159,26 @@ export default class CreationOrEditingView extends AbstractView {
   #offersForType = null;
   #mode = null;
   #point = null;
+  #handleEditFormSubmit = null;
 
-  constructor(destination, offersForType, point = blankPoint, mode = Mode.CREATE) {
+  constructor({destination, offersForType, point = blankPoint, mode = Mode.CREATE, onEditFormSubmit}) {
     super();
     this.#destination = destination;
     this.#offersForType = offersForType;
     this.#mode = mode;
     this.#point = point;
+    this.#handleEditFormSubmit = onEditFormSubmit;
+
+    this.element.querySelector('.event--edit').addEventListener('submit', this.#editFormSubmitHandler);
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#editFormSubmitHandler);
   }
 
   get template() {
-    return createEditEventTemplate(this.#destination, this.#offersForType, this.#point, this.#mode);
+    return createEditPointTemplate(this.#destination, this.#offersForType, this.#point, this.#mode);
   }
+
+  #editFormSubmitHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleEditFormSubmit();
+  };
 }
