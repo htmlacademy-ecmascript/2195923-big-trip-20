@@ -79,7 +79,7 @@ export default class PointsListPresenter {
   #renderPointList() {
     render(this.#pointsListComponent, this.#pointsListContainer);
 
-    for (let i = 1; i < this.#routePoints.length; i++) {
+    for (let i = 0; i < this.#routePoints.length; i++) {
       const destination = this.#destinations.find((destinationElement) => destinationElement.id === this.#routePoints[i].destination);
       const offersForType = this.#offers.find((offer) => offer.type === this.#routePoints[i].type);
 

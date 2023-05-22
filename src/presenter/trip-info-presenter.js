@@ -8,8 +8,6 @@ export default class TripInfoPresenter {
   #offersModel = null;
 
   #routePoints = [];
-  #destinations = [];
-  #offers = [];
 
   constructor(tripInfoContainer, models) {
     this.#tripInfoContainer = tripInfoContainer;
@@ -22,13 +20,30 @@ export default class TripInfoPresenter {
 
   init() {
     this.#routePoints = [...this.#pointsModel.points];
-    this.#destinations = [...this.#destinationsModel.destinations];
-    this.#offers = [...this.#offersModel.offers];
-    this.#renderTripInfo({points: this.#routePoints, destinations: this.#destinations, offers: this.#offers});
+    const tripStartDate = this.#pointsModel.tripStartDate;
+    const tripEndDate = this.#pointsModel.tripEndDate;
+
+    const totalPrice = this.#calculateTotalPrice(this.#pointsModel.totalPrice);
+    const routeOfTrip = this.#destinationsModel.getRouteOfTrip(this.#pointsModel.destinationIds);
+
+    this.#renderTripInfo({
+      tripStartDate: tripStartDate,
+      tripEndDate: tripEndDate,
+      totalPrice: totalPrice,
+      routeOfTrip: routeOfTrip,
+    });
   }
 
   #renderTripInfo(data) {
     const tripInfoComponent = new TripInfoView(data);
     render(tripInfoComponent, this.#tripInfoContainer, RenderPosition.AFTERBEGIN);
+  }
+
+  #calculateTotalPrice(pointsBasePrice) {
+    let offersPrice = 0;
+    for (const point of this.#routePoints) {
+      offersPrice += this.#offersModel.getTotalPriceByTypeAndIds(point.type, point.offers);
+    }
+    return pointsBasePrice + offersPrice;
   }
 }
