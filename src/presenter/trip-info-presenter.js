@@ -21,9 +21,9 @@ export default class TripInfoPresenter {
   }
 
   init() {
-    this.#routePoints = [...this.#pointsModel.getPoints()];
-    this.#destinations = [...this.#destinationsModel.getDestinations()];
-    this.#offers = [...this.#offersModel.getOffers()];
+    this.#routePoints = [...this.#pointsModel.points];
+    this.#destinations = [...this.#destinationsModel.destinations];
+    this.#offers = [...this.#offersModel.offers];
     this.#renderTripInfo({points: this.#routePoints, destinations: this.#destinations, offers: this.#offers});
   }
 

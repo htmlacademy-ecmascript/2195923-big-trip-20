@@ -26,9 +26,9 @@ export default class PointsListPresenter {
   }
 
   init() {
-    this.#routePoints = [...this.#pointsModel.getPoints()];
-    this.#destinations = [...this.#destinationsModel.getDestinations()];
-    this.#offers = [...this.#offersModel.getOffers()];
+    this.#routePoints = [...this.#pointsModel.points];
+    this.#destinations = [...this.#destinationsModel.destinations];
+    this.#offers = [...this.#offersModel.offers];
 
     render(this.#pointsListComponent, this.#pointsListContainer);
 
