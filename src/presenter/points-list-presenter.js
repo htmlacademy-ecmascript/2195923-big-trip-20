@@ -1,7 +1,7 @@
 import PointsListView from '../view/points-list-view.js';
 import PointView from '../view/point-view.js';
 import CreationOrEditingView from '../view/creation-or-editing-view.js';
-import { render } from '../render.js';
+import { render } from '../framework/render.js';
 import { Mode } from '../const.js';
 
 export default class PointsListPresenter {
@@ -25,7 +25,7 @@ export default class PointsListPresenter {
 
     let destination = this.destinations.find((destinationElement) => destinationElement.id === this.routePoints[0].destination);
     let offersForType = this.offers.find((offer) => offer.type === this.routePoints[0].type);
-    render(new CreationOrEditingView(destination, offersForType, this.routePoints[0], Mode.EDIT), this.pointsListComponent.getElement());
+    render(new CreationOrEditingView(destination, offersForType, this.routePoints[0], Mode.EDIT), this.pointsListComponent.element);
 
     for (let i = 1; i < this.routePoints.length; i++) {
       destination = this.destinations.find((destinationElement) => destinationElement.id === this.routePoints[i].destination);
@@ -35,7 +35,7 @@ export default class PointsListPresenter {
       this.routePoints[i].offers.forEach((routePointsOfferId) => {
         checkedOffers.push(offersForType.offers.find((offerElement) => offerElement.id === routePointsOfferId));
       });
-      render(new PointView({point: this.routePoints[i], destination: destination, offers: checkedOffers}), this.pointsListComponent.getElement());
+      render(new PointView({point: this.routePoints[i], destination: destination, offers: checkedOffers}), this.pointsListComponent.element);
     }
   }
 }

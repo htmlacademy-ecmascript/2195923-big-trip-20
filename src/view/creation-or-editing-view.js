@@ -1,7 +1,7 @@
-import { createElement } from '../render.js';
 import { DateFormat, Mode } from '../const.js';
 import { formatDate } from '../utils.js';
 import { DestinationNames, RoutePointTypes } from '../mock/const.js';
+import AbstractView from '../framework/view/abstract-view.js';
 
 const blankPoint = {
   basePrice: 0,
@@ -154,27 +154,21 @@ function createEditEventTemplate(destination, offersForType, point, mode) {
           </li>`;
 }
 
-export default class CreationOrEditingView {
+export default class CreationOrEditingView extends AbstractView {
+  #destination = null;
+  #offersForType = null;
+  #mode = null;
+  #point = null;
+
   constructor(destination, offersForType, point = blankPoint, mode = Mode.CREATE) {
-    this.destination = destination;
-    this.offersForType = offersForType;
-    this.mode = mode;
-    this.point = point;
+    super();
+    this.#destination = destination;
+    this.#offersForType = offersForType;
+    this.#mode = mode;
+    this.#point = point;
   }
 
-  getTemplate() {
-    return createEditEventTemplate(this.destination, this.offersForType, this.point, this.mode);
-  }
-
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
+  get template() {
+    return createEditEventTemplate(this.#destination, this.#offersForType, this.#point, this.#mode);
   }
 }

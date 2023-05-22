@@ -1,6 +1,6 @@
-import { createElement } from '../render.js';
 import { formatDate } from '../utils.js';
 import { DateFormat, QUANTITY_OF_CITIES_IN_TRIP } from '../const.js';
+import AbstractView from '../framework/view/abstract-view.js';
 
 const createDurationInTemplate = (points) => {
   const dateFrom = points[0].dateFrom;
@@ -62,26 +62,19 @@ function createTripInfoTemplate(points, destinations, offers) {
   );
 }
 
-export default class TripInfoView {
+export default class TripInfoView extends AbstractView {
+  #points = null;
+  #destinations = null;
+  #offers = null;
+
   constructor(points, destinations, offers) {
-    this.points = points;
-    this.destinations = destinations;
-    this.offers = offers;
+    super();
+    this.#points = points;
+    this.#destinations = destinations;
+    this.#offers = offers;
   }
 
-  getTemplate() {
-    return createTripInfoTemplate(this.points, this.destinations, this.offers);
-  }
-
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
+  get template() {
+    return createTripInfoTemplate(this.#points, this.#destinations, this.#offers);
   }
 }
