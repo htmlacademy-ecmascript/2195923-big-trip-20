@@ -5,37 +5,46 @@ import { render } from '../framework/render.js';
 import { Mode } from '../const.js';
 
 export default class PointsListPresenter {
-  pointsListComponent = new PointsListView();
+  #pointsListComponent = new PointsListView();
+  #pointsListContainer = null;
+  #pointsModel = null;
+  #destinationsModel = null;
+  #offersModel = null;
+
+  #routePoints = null;
+  #destinations = null;
+  #offers = null;
+
 
   constructor(pointsListContainer, models) {
-    this.pointsListContainer = pointsListContainer;
+    this.#pointsListContainer = pointsListContainer;
 
     const {pointsModel, destinationsModel, offersModel} = models;
-    this.pointsModel = pointsModel;
-    this.destinationsModel = destinationsModel;
-    this.offersModel = offersModel;
+    this.#pointsModel = pointsModel;
+    this.#destinationsModel = destinationsModel;
+    this.#offersModel = offersModel;
   }
 
   init() {
-    this.routePoints = [...this.pointsModel.getPoints()];
-    this.destinations = [...this.destinationsModel.getDestinations()];
-    this.offers = [...this.offersModel.getOffers()];
+    this.#routePoints = [...this.#pointsModel.getPoints()];
+    this.#destinations = [...this.#destinationsModel.getDestinations()];
+    this.#offers = [...this.#offersModel.getOffers()];
 
-    render(this.pointsListComponent, this.pointsListContainer);
+    render(this.#pointsListComponent, this.#pointsListContainer);
 
-    let destination = this.destinations.find((destinationElement) => destinationElement.id === this.routePoints[0].destination);
-    let offersForType = this.offers.find((offer) => offer.type === this.routePoints[0].type);
-    render(new CreationOrEditingView(destination, offersForType, this.routePoints[0], Mode.EDIT), this.pointsListComponent.element);
+    let destination = this.#destinations.find((destinationElement) => destinationElement.id === this.#routePoints[0].destination);
+    let offersForType = this.#offers.find((offer) => offer.type === this.#routePoints[0].type);
+    render(new CreationOrEditingView(destination, offersForType, this.#routePoints[0], Mode.EDIT), this.#pointsListComponent.element);
 
-    for (let i = 1; i < this.routePoints.length; i++) {
-      destination = this.destinations.find((destinationElement) => destinationElement.id === this.routePoints[i].destination);
-      offersForType = this.offers.find((offer) => offer.type === this.routePoints[i].type);
+    for (let i = 1; i < this.#routePoints.length; i++) {
+      destination = this.#destinations.find((destinationElement) => destinationElement.id === this.#routePoints[i].destination);
+      offersForType = this.#offers.find((offer) => offer.type === this.#routePoints[i].type);
 
       const checkedOffers = [];
-      this.routePoints[i].offers.forEach((routePointsOfferId) => {
+      this.#routePoints[i].offers.forEach((routePointsOfferId) => {
         checkedOffers.push(offersForType.offers.find((offerElement) => offerElement.id === routePointsOfferId));
       });
-      render(new PointView({point: this.routePoints[i], destination: destination, offers: checkedOffers}), this.pointsListComponent.element);
+      render(new PointView({point: this.#routePoints[i], destination: destination, offers: checkedOffers}), this.#pointsListComponent.element);
     }
   }
 }
