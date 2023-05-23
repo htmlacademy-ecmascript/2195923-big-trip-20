@@ -1,17 +1,17 @@
-import { createElement } from '../render.js';
 import { DateFormat, Mode } from '../const.js';
 import { formatDate } from '../utils.js';
-import { DestinationNames, RoutePointTypes } from '../mock/const.js';
+import { destinationNames, routePointTypes } from '../mock/const.js';
+import AbstractView from '../framework/view/abstract-view.js';
 
 const blankPoint = {
   basePrice: 0,
   dateFrom: new Date(),
   dateTo: new Date(),
-  destination: DestinationNames[0],
+  destination: destinationNames[0],
   id: 0,
   isFavorite: false,
   offers: [],
-  type: RoutePointTypes[0],
+  type: routePointTypes[0],
 };
 
 const createDescriptionOfPointInTemplate = (description) => `<p class="event__destination-description">${description}</p>`;
@@ -26,7 +26,7 @@ const createListOfPicturesInTemplate = (pictures) => {
 
 const createRoutePointTypesInTemplate = (type) => {
   let list = '';
-  for (const point of RoutePointTypes) {
+  for (const point of routePointTypes) {
     const pointWithFirstCapitalLetter = point[0].toUpperCase() + point.slice(1);
     list += `<div class="event__type-item">
       <input id="event-type-${point}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${point}" ${type === point ? 'checked' : ''}>
@@ -38,7 +38,7 @@ const createRoutePointTypesInTemplate = (type) => {
 
 const createDestinationNamesInTemplate = () => {
   let list = '';
-  for (const name of DestinationNames) {
+  for (const name of destinationNames) {
     list += `<option value="${name}"></option>`;
   }
   return list;
@@ -93,7 +93,7 @@ const createSectionOfDestinationInTemplate = (destination) => {
 };
 
 
-function createEditEventTemplate(destination, offersForType, point, mode) {
+function createEditPointTemplate(destination, offersForType, point, mode) {
   const { basePrice, dateFrom, dateTo, offers, type } = point;
   const { name } = destination;
   const isEdit = mode === Mode.EDIT;
@@ -154,27 +154,31 @@ function createEditEventTemplate(destination, offersForType, point, mode) {
           </li>`;
 }
 
-export default class CreationOrEditingView {
-  constructor(destination, offersForType, point = blankPoint, mode = Mode.CREATE) {
-    this.destination = destination;
-    this.offersForType = offersForType;
-    this.mode = mode;
-    this.point = point;
+export default class CreationOrEditingView extends AbstractView {
+  #destination = null;
+  #offersForType = null;
+  #mode = null;
+  #point = null;
+  #handleEditFormSubmit = null;
+
+  constructor({destination, offersForType, point = blankPoint, mode = Mode.CREATE, onEditFormSubmit}) {
+    super();
+    this.#destination = destination;
+    this.#offersForType = offersForType;
+    this.#mode = mode;
+    this.#point = point;
+    this.#handleEditFormSubmit = onEditFormSubmit;
+
+    this.element.querySelector('.event--edit').addEventListener('submit', this.#editFormSubmitHandler);
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#editFormSubmitHandler);
   }
 
-  getTemplate() {
-    return createEditEventTemplate(this.destination, this.offersForType, this.point, this.mode);
+  get template() {
+    return createEditPointTemplate(this.#destination, this.#offersForType, this.#point, this.#mode);
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
-  }
+  #editFormSubmitHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleEditFormSubmit();
+  };
 }

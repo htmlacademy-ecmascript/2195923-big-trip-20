@@ -1,6 +1,6 @@
 import { nanoid } from 'nanoid';
 import { getRandomInteger } from './util.js';
-import { RoutePointTypes } from './const.js';
+import { routePointTypes } from './const.js';
 
 const mockOffers = [];
 
@@ -57,7 +57,7 @@ const getRandomOffers = () => {
 };
 
 const generateOffers = () => {
-  RoutePointTypes.forEach((routePointType) => {
+  routePointTypes.forEach((routePointType) => {
     const offersObj = {
       type: routePointType,
       offers: getRandomOffers(),

@@ -1,4 +1,4 @@
-const RoutePointTypes = [
+const routePointTypes = [
   'taxi',
   'bus',
   'train',
@@ -10,7 +10,7 @@ const RoutePointTypes = [
   'restaurant',
 ];
 
-const DestinationNames = [
+const destinationNames = [
   'Abakan',
   'Barnaul',
   'Veliky Novgorod',
@@ -38,7 +38,7 @@ const DestinationNames = [
   'Yakutsk',
 ];
 
-const Descriptions = [
+const descriptions = [
   'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ',
   'Cras aliquet varius magna, non porta ligula feugiat eget. ',
   'Fusce tristique felis at fermentum pharetra. ',
@@ -52,4 +52,4 @@ const Descriptions = [
   'In rutrum ac purus sit amet tempus. ',
 ];
 
-export {RoutePointTypes, DestinationNames, Descriptions};
+export {routePointTypes, destinationNames, descriptions};
