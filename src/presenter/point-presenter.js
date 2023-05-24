@@ -5,6 +5,8 @@ import { Mode } from '../const.js';
 
 export default class PointPresenter {
   #point = null;
+  #mode = Mode.DEFAULT;
+
   #pointContainer = null;
   #pointComponent = null;
   #pointEditComponent = null;
@@ -13,10 +15,12 @@ export default class PointPresenter {
   #prevEditComponent = null;
 
   #handleDataChange = null;
+  #handleModeChange = null;
 
-  constructor({pointsListContainer, onDataChange}) {
+  constructor({pointsListContainer, onDataChange, onModeChange}) {
     this.#pointContainer = pointsListContainer;
     this.#handleDataChange = onDataChange;
+    this.#handleModeChange = onModeChange;
   }
 
   init({point, destinations, offers}) {
@@ -63,11 +67,11 @@ export default class PointPresenter {
       return;
     }
 
-    if (this.#pointContainer.element.contains(this.#prevPointComponent.element)) {
+    if (this.#mode === Mode.DEFAULT) {
       replace(this.#pointComponent, this.#prevPointComponent);
     }
 
-    if (this.#pointEditComponent.element.contains(this.#prevEditComponent.element)) {
+    if (this.#mode === Mode.EDIT) {
       replace(this.#pointEditComponent, this.#prevEditComponent);
     }
 
@@ -80,12 +84,21 @@ export default class PointPresenter {
     remove(this.#pointEditComponent);
   }
 
+  resetView() {
+    if (this.#mode !== Mode.DEFAULT) {
+      this.#replaceEditFormToPoint();
+    }
+  }
+
   #replacePointToEditForm() {
     replace(this.#pointEditComponent, this.#pointComponent);
+    this.#handleModeChange();
+    this.#mode = Mode.EDIT;
   }
 
   #replaceEditFormToPoint() {
     replace(this.#pointComponent, this.#pointEditComponent);
+    this.#mode = Mode.DEFAULT;
   }
 
   #escKeyDownHandler = (evt) => {
