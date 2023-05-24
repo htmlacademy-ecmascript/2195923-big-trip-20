@@ -1,6 +1,7 @@
 import PointsListView from '../view/points-list-view.js';
 import { render } from '../framework/render.js';
 import PointPresenter from './point-presenter.js';
+import { updateItem } from '../utils.js';
 
 export default class PointsListPresenter {
   #pointsListComponent = new PointsListView();
@@ -12,7 +13,7 @@ export default class PointsListPresenter {
   #routePoints = [];
   #destinations = [];
   #offers = [];
-
+  #pointPresenters = new Map();
 
   constructor(pointsListContainer, models) {
     this.#pointsListContainer = pointsListContainer;
@@ -32,8 +33,12 @@ export default class PointsListPresenter {
   }
 
   #renderPoint({point, destinations, offers}) {
-    const pointPresenter = new PointPresenter(this.#pointsListComponent);
+    const pointPresenter = new PointPresenter({
+      pointsListContainer: this.#pointsListComponent,
+      onDataChange: this.#handlePointChange
+    });
     pointPresenter.init({point, destinations, offers});
+    this.#pointPresenters.set(point.id, pointPresenter);
   }
 
   #renderPointList() {
@@ -43,4 +48,14 @@ export default class PointsListPresenter {
       this.#renderPoint({point: this.#routePoints[i], destinations: this.#destinations, offers: this.#offers});
     }
   }
+
+  #clearPointList() {
+    this.#pointPresenters.forEach((presenter) => presenter.destroy());
+    this.#pointPresenters.clear();
+  }
+
+  #handlePointChange = (updatedPoint) => {
+    this.#routePoints = updateItem(this.#routePoints, updatedPoint);
+    this.#pointPresenters.get(updatedPoint.id).init({point: updatedPoint, destinations: this.#destinations, offers: this.#offers});
+  };
 }
