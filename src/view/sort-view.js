@@ -30,14 +30,14 @@ export default class SortView extends AbstractView {
   constructor({onSortTypeChange}) {
     super();
     this.#handleSortTypeChange = onSortTypeChange;
-    this.element.querySelector('.trip-sort__item').parentElement.addEventListener('change', this.#sortTypeClickHandler);
+    this.element.addEventListener('change', this.#sortTypeChangeHandler);
   }
 
   get template() {
     return createSortTemplate();
   }
 
-  #sortTypeClickHandler = (evt) => {
+  #sortTypeChangeHandler = (evt) => {
     evt.preventDefault();
     const sortType = evt.target.id.split('-')[1];
     this.#handleSortTypeChange(sortType);

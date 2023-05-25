@@ -16,6 +16,7 @@ export default class PointsListPresenter {
   #destinations = [];
   #offers = [];
   #pointPresenters = new Map();
+  #currentSortType = sortings[0].name;
 
   constructor(pointsListContainer, models) {
     this.#pointsListContainer = pointsListContainer;
@@ -73,8 +74,12 @@ export default class PointsListPresenter {
   };
 
   #handleSortTypeChange = (sortType) => {
+    if (this.#currentSortType === sortType) {
+      return;
+    }
     const sortFunction = sortings.find((sortElement) => sortElement.name === sortType).func;
     this.#routePoints.sort(sortFunction);
+    this.#currentSortType = sortType;
     this.#clearPointList();
     this.#renderPointList();
   };
