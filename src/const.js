@@ -23,6 +23,7 @@ const Filter = {
 };
 
 const Mode = {
+  DEFAULT: 'Default',
   EDIT: 'Edit',
   CREATE: 'Create',
 };

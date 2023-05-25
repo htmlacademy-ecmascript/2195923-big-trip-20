@@ -1,8 +1,7 @@
 import PointsListView from '../view/points-list-view.js';
-import PointView from '../view/point-view.js';
-import CreationOrEditingView from '../view/creation-or-editing-view.js';
-import { render, replace } from '../framework/render.js';
-import { Mode } from '../const.js';
+import { render } from '../framework/render.js';
+import PointPresenter from './point-presenter.js';
+import { updateItem } from '../utils.js';
 
 export default class PointsListPresenter {
   #pointsListComponent = new PointsListView();
@@ -14,7 +13,7 @@ export default class PointsListPresenter {
   #routePoints = [];
   #destinations = [];
   #offers = [];
-
+  #pointPresenters = new Map();
 
   constructor(pointsListContainer, models) {
     this.#pointsListContainer = pointsListContainer;
@@ -33,61 +32,35 @@ export default class PointsListPresenter {
     this.#renderPointList();
   }
 
-  #renderPoint({point, destination, offers}) {
-    const offersForType = this.#offers.find((offer) => offer.type === point.type);
-
-    const escKeyDownHandler = (evt) => {
-      if (evt.key === 'Escape') {
-        evt.preventDefault();
-        replaceEditFormToPoint();
-        document.removeEventListener('keydown', escKeyDownHandler);
-      }
-    };
-
-    const pointComponent = new PointView({
-      point,
-      destination,
-      offers,
-      onEditClick: () => {
-        replacePointToEditForm();
-        document.addEventListener('keydown', escKeyDownHandler);
-      }
+  #renderPoint({point, destinations, offers}) {
+    const pointPresenter = new PointPresenter({
+      pointsListContainer: this.#pointsListComponent,
+      onDataChange: this.#handlePointChange,
+      onModeChange: this.#handleModeChange
     });
-
-    const pointEditComponent = new CreationOrEditingView({
-      point,
-      destination,
-      offersForType,
-      mode: Mode.EDIT,
-      onEditFormSubmit: () => {
-        replaceEditFormToPoint();
-        document.removeEventListener('keydown', escKeyDownHandler);
-      }
-    });
-
-    function replacePointToEditForm() {
-      replace(pointEditComponent, pointComponent);
-    }
-
-    function replaceEditFormToPoint() {
-      replace(pointComponent, pointEditComponent);
-    }
-
-    render(pointComponent, this.#pointsListComponent.element);
+    pointPresenter.init({point, destinations, offers});
+    this.#pointPresenters.set(point.id, pointPresenter);
   }
 
   #renderPointList() {
     render(this.#pointsListComponent, this.#pointsListContainer);
 
     for (let i = 0; i < this.#routePoints.length; i++) {
-      const destination = this.#destinations.find((destinationElement) => destinationElement.id === this.#routePoints[i].destination);
-      const offersForType = this.#offers.find((offer) => offer.type === this.#routePoints[i].type);
-
-      const checkedOffers = [];
-      this.#routePoints[i].offers.forEach((routePointsOfferId) => {
-        checkedOffers.push(offersForType.offers.find((offerElement) => offerElement.id === routePointsOfferId));
-      });
-      this.#renderPoint({point: this.#routePoints[i], destination: destination, offers: checkedOffers});
+      this.#renderPoint({point: this.#routePoints[i], destinations: this.#destinations, offers: this.#offers});
     }
   }
+
+  #clearPointList() {
+    this.#pointPresenters.forEach((presenter) => presenter.destroy());
+    this.#pointPresenters.clear();
+  }
+
+  #handleModeChange = () => {
+    this.#pointPresenters.forEach((presenter) => presenter.resetView());
+  };
+
+  #handlePointChange = (updatedPoint) => {
+    this.#routePoints = updateItem(this.#routePoints, updatedPoint);
+    this.#pointPresenters.get(updatedPoint.id).init({point: updatedPoint, destinations: this.#destinations, offers: this.#offers});
+  };
 }

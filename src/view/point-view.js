@@ -64,25 +64,33 @@ function createPointTemplate(point, destination, offers) {
 export default class PointView extends AbstractView {
   #point = null;
   #destination = null;
-  #offers = null;
+  #checkedOffers = null;
   #handleEditClick = null;
+  #handleFavoriteClick = null;
 
-  constructor({point, destination, offers, onEditClick}) {
+  constructor({point, destination, checkedOffers, onEditClick, onFavoriteClick}) {
     super();
     this.#point = point;
     this.#destination = destination;
-    this.#offers = offers;
+    this.#checkedOffers = checkedOffers;
     this.#handleEditClick = onEditClick;
+    this.#handleFavoriteClick = onFavoriteClick;
 
     this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#editClickHandler);
+    this.element.querySelector('.event__favorite-btn').addEventListener('click', this.#favoriteClickHandler);
   }
 
   get template() {
-    return createPointTemplate(this.#point, this.#destination, this.#offers);
+    return createPointTemplate(this.#point, this.#destination, this.#checkedOffers);
   }
 
   #editClickHandler = (evt) => {
     evt.preventDefault();
     this.#handleEditClick();
+  };
+
+  #favoriteClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleFavoriteClick();
   };
 }
