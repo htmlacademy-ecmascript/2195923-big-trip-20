@@ -38,6 +38,34 @@ const KeyboardKey = {
   ESC: 'Esc',
 };
 
+const sortings = [
+  {
+    name: 'day',
+    attribute: 'checked',
+    func: (point1, point2) => point1.dateFrom - point2.dateFrom,
+  },
+  {
+    name: 'event',
+    attribute: 'disabled',
+    func: () => {},
+  },
+  {
+    name: 'time',
+    attribute: '',
+    func: (point1, point2) => (point2.dateTo - point2.dateFrom) - (point1.dateTo - point1.dateFrom),
+  },
+  {
+    name: 'price',
+    attribute: '',
+    func: (point1, point2) => point2.basePrice - point1.basePrice,
+  },
+  {
+    name: 'offers',
+    attribute: 'disabled',
+    func: () => {},
+  }
+];
+
 const QUANTITY_OF_CITIES_IN_TRIP = 3;
 
-export { Time, DateFormat, Filter, Mode, LocationElement, KeyboardKey, QUANTITY_OF_CITIES_IN_TRIP };
+export { Time, DateFormat, Filter, Mode, LocationElement, KeyboardKey, sortings, QUANTITY_OF_CITIES_IN_TRIP };
