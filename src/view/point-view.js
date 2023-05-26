@@ -2,18 +2,18 @@ import { formatDate, formatDuration } from '../utils.js';
 import { DateFormat } from '../const.js';
 import AbstractView from '../framework/view/abstract-view.js';
 
-const createListOffersInTemplate = (offers) => {
+const createListOffersInTemplate = (checkedOffers) => {
 
   const eventList = document.createElement('ul');
   eventList.classList.add('event__selected-offers');
 
-  for (let i = 0; i < offers.length; i++) {
+  for (let i = 0; i < checkedOffers.length; i++) {
 
     const eventOffer =
       `<li class="event__offer">
-        <span class="event__offer-title">${offers[i].title}</span>
+        <span class="event__offer-title">${checkedOffers[i].title}</span>
         &plus;&euro;&nbsp;
-        <span class="event__offer-price">${offers[i].price}</span>
+        <span class="event__offer-price">${checkedOffers[i].price}</span>
       </li>`;
 
     eventList.insertAdjacentHTML('beforeend', eventOffer);
@@ -21,10 +21,10 @@ const createListOffersInTemplate = (offers) => {
   return eventList.outerHTML;
 };
 
-function createPointTemplate(point, destination, offers) {
+function createPointTemplate(point, destination, checkedOffers) {
   const { basePrice, dateFrom, dateTo, isFavorite, type } = point;
   const { name } = destination;
-  const listOffers = createListOffersInTemplate(offers);
+  const listOffers = createListOffersInTemplate(checkedOffers);
 
   return (
     `<li class="trip-events__item">

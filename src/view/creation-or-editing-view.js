@@ -1,7 +1,7 @@
 import { DateFormat, Mode } from '../const.js';
 import { formatDate } from '../utils.js';
 import { destinationNames, routePointTypes } from '../mock/const.js';
-import AbstractView from '../framework/view/abstract-view.js';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 
 const blankPoint = {
   basePrice: 0,
@@ -46,9 +46,9 @@ const createDestinationNamesInTemplate = () => {
 
 const createListOfOffersInTemplate = (offersForType, checkedOffers) => {
   let list = '';
-  for (const offer of offersForType.offers) {
+  for (const offer of offersForType) {
     const lastWordOfTitle = offer.title.split(' ').pop();
-    const isChecked = checkedOffers.find((checkedOffer) => checkedOffer === offer.id);
+    const isChecked = checkedOffers?.find((checkedOffer) => checkedOffer === offer.id);
     list +=
       `<div class="event__offer-selector">
         <input class="event__offer-checkbox  visually-hidden" id="event-offer-${lastWordOfTitle}-1" type="checkbox" name="event-offer-${lastWordOfTitle}" ${isChecked ? 'checked' : ''}>
@@ -93,8 +93,8 @@ const createSectionOfDestinationInTemplate = (destination) => {
 };
 
 
-function createEditPointTemplate(destination, offersForType, point, mode) {
-  const { basePrice, dateFrom, dateTo, offers, type } = point;
+function createEditPointTemplate(destination, point, mode) {
+  const { basePrice, dateFrom, dateTo, offers, offersForType, type } = point;
   const { name } = destination;
   const isEdit = mode === Mode.EDIT;
 
@@ -154,31 +154,79 @@ function createEditPointTemplate(destination, offersForType, point, mode) {
           </li>`;
 }
 
-export default class CreationOrEditingView extends AbstractView {
+export default class CreationOrEditingView extends AbstractStatefulView {
+  #allDestinations = null;
   #destination = null;
+  #allOffers = null;
   #offersForType = null;
   #mode = null;
   #point = null;
   #handleEditFormSubmit = null;
+  #handleEditFormCancel = null;
 
-  constructor({destination, offersForType, point = blankPoint, mode = Mode.CREATE, onEditFormSubmit}) {
+  constructor({allDestinations, destination, allOffers, offersForType, point = blankPoint, mode = Mode.CREATE, onEditFormSubmit, onEditFormCancel}) {
     super();
+    this.#allDestinations = allDestinations;
     this.#destination = destination;
+    this.#allOffers = allOffers;
     this.#offersForType = offersForType;
     this.#mode = mode;
-    this.#point = point;
-    this.#handleEditFormSubmit = onEditFormSubmit;
+    this._setState(CreationOrEditingView.parsePointToState(point, this.#offersForType));
 
+    this.#handleEditFormSubmit = onEditFormSubmit;
+    this.#handleEditFormCancel = onEditFormCancel;
+
+    this._restoreHandlers();
+  }
+
+  _restoreHandlers() {
     this.element.querySelector('.event--edit').addEventListener('submit', this.#editFormSubmitHandler);
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#editFormSubmitHandler);
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#editFormCancelHandler);
+    this.element.querySelector('.event__type-group').addEventListener('change', this.#pointTypeChangeHandler);
+    this.element.querySelector('.event__input--destination').addEventListener('change', this.#pointDestinationHandler);
   }
 
   get template() {
-    return createEditPointTemplate(this.#destination, this.#offersForType, this.#point, this.#mode);
+    return createEditPointTemplate(this.#destination, this._state, this.#mode);
   }
 
   #editFormSubmitHandler = (evt) => {
     evt.preventDefault();
-    this.#handleEditFormSubmit();
+    this.#handleEditFormSubmit(CreationOrEditingView.parseStateToPoint(this._state));
   };
+
+  #editFormCancelHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleEditFormCancel();
+  };
+
+  #pointTypeChangeHandler = (evt) => {
+    evt.preventDefault();
+    this.updateElement({
+      type: evt.target.value,
+      offers: null,
+      offersForType: this.#allOffers.find((offer) => offer.type === evt.target.value).offers,
+    });
+  };
+
+  #pointDestinationHandler = (evt) => {
+    evt.preventDefault();
+    this.updateElement({
+      destination: this.#allDestinations.find((destination) => destination.name === evt.target.value).id,
+    });
+  };
+
+  static parsePointToState(point, offersForType) {
+    return {...point, offersForType: offersForType};
+  }
+
+  static parseStateToPoint(state) {
+    return state;
+  }
+
+  reset(point, offersForType) {
+    this.updateElement(
+      CreationOrEditingView.parsePointToState(point, offersForType)
+    );
+  }
 }
