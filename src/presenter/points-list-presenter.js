@@ -1,7 +1,9 @@
 import PointsListView from '../view/points-list-view.js';
+import SortView from '../view/sort-view.js';
 import { render } from '../framework/render.js';
 import PointPresenter from './point-presenter.js';
 import { updateItem } from '../utils.js';
+import { sortings } from '../const.js';
 
 export default class PointsListPresenter {
   #pointsListComponent = new PointsListView();
@@ -14,6 +16,7 @@ export default class PointsListPresenter {
   #destinations = [];
   #offers = [];
   #pointPresenters = new Map();
+  #currentSortType = sortings[0].name;
 
   constructor(pointsListContainer, models) {
     this.#pointsListContainer = pointsListContainer;
@@ -29,6 +32,7 @@ export default class PointsListPresenter {
     this.#destinations = [...this.#destinationsModel.destinations];
     this.#offers = [...this.#offersModel.offers];
 
+    this.#renderSort();
     this.#renderPointList();
   }
 
@@ -50,6 +54,11 @@ export default class PointsListPresenter {
     }
   }
 
+  #renderSort() {
+    const sortComponent = new SortView({onSortTypeChange: this.#handleSortTypeChange});
+    render(sortComponent, this.#pointsListContainer);
+  }
+
   #clearPointList() {
     this.#pointPresenters.forEach((presenter) => presenter.destroy());
     this.#pointPresenters.clear();
@@ -62,5 +71,16 @@ export default class PointsListPresenter {
   #handlePointChange = (updatedPoint) => {
     this.#routePoints = updateItem(this.#routePoints, updatedPoint);
     this.#pointPresenters.get(updatedPoint.id).init({point: updatedPoint, destinations: this.#destinations, offers: this.#offers});
+  };
+
+  #handleSortTypeChange = (sortType) => {
+    if (this.#currentSortType === sortType) {
+      return;
+    }
+    const sortFunction = sortings.find((sortElement) => sortElement.name === sortType).func;
+    this.#routePoints.sort(sortFunction);
+    this.#currentSortType = sortType;
+    this.#clearPointList();
+    this.#renderPointList();
   };
 }
