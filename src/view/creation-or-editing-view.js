@@ -206,6 +206,7 @@ export default class CreationOrEditingView extends AbstractStatefulView {
   #pointTypeChangeHandler = (evt) => {
     evt.preventDefault();
     this.#offersForType = this.#allOffers.find((offer) => offer.type === evt.target.value).offers;
+    this.#checkedOffers = [];
     this.updateElement({
       type: evt.target.value,
       offers: null,
