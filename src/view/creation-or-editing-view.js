@@ -2,6 +2,7 @@ import { DateFormat, Mode } from '../const.js';
 import { formatDate } from '../utils.js';
 import { destinationNames, routePointTypes } from '../mock/const.js';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
+import dayjs from 'dayjs';
 
 const blankPoint = {
   basePrice: 0,
@@ -48,7 +49,7 @@ const createListOfOffersInTemplate = (offersForType, checkedOffers) => {
   let list = '';
   for (const offer of offersForType) {
     const lastWordOfTitle = offer.title.split(' ').pop();
-    const isChecked = checkedOffers?.find((checkedOffer) => checkedOffer === offer.id);
+    const isChecked = checkedOffers?.find((checkedOffer) => checkedOffer.id === offer.id);
     list +=
       `<div class="event__offer-selector">
         <input class="event__offer-checkbox  visually-hidden" id="event-offer-${lastWordOfTitle}-1" type="checkbox" name="event-offer-${lastWordOfTitle}" ${isChecked ? 'checked' : ''}>
@@ -93,9 +94,8 @@ const createSectionOfDestinationInTemplate = (destination) => {
 };
 
 
-function createEditPointTemplate(destination, point, mode) {
-  const { basePrice, dateFrom, dateTo, offers, offersForType, type } = point;
-  const { name } = destination;
+function createEditPointTemplate(point, mode) {
+  const { basePrice, dateFrom, dateTo, offers, offersForType, type, destination } = point;
   const isEdit = mode === Mode.EDIT;
 
   return `<li class="trip-events__item">
@@ -117,7 +117,7 @@ function createEditPointTemplate(destination, point, mode) {
 
                 <div class="event__field-group  event__field-group--destination">
                   <label class="event__label  event__type-output" for="event-destination-1">${type}</label>
-                  <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${name}" list="destination-list-1">
+                  <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination.name}" list="destination-list-1">
                   <datalist id="destination-list-1">
                     ${createDestinationNamesInTemplate()}
                   </datalist>
@@ -159,19 +159,21 @@ export default class CreationOrEditingView extends AbstractStatefulView {
   #destination = null;
   #allOffers = null;
   #offersForType = null;
+  #checkedOffers = null;
   #mode = null;
   #point = null;
   #handleEditFormSubmit = null;
   #handleEditFormCancel = null;
 
-  constructor({allDestinations, destination, allOffers, offersForType, point = blankPoint, mode = Mode.CREATE, onEditFormSubmit, onEditFormCancel}) {
+  constructor({allDestinations, destination, allOffers, offersForType, checkedOffers, point = blankPoint, mode = Mode.CREATE, onEditFormSubmit, onEditFormCancel}) {
     super();
     this.#allDestinations = allDestinations;
     this.#destination = destination;
     this.#allOffers = allOffers;
     this.#offersForType = offersForType;
+    this.#checkedOffers = checkedOffers;
     this.#mode = mode;
-    this._setState(CreationOrEditingView.parsePointToState(point, this.#offersForType));
+    this._setState(CreationOrEditingView.parsePointToState(point, this.#offersForType, this.#checkedOffers, this.#destination));
 
     this.#handleEditFormSubmit = onEditFormSubmit;
     this.#handleEditFormCancel = onEditFormCancel;
@@ -183,11 +185,12 @@ export default class CreationOrEditingView extends AbstractStatefulView {
     this.element.querySelector('.event--edit').addEventListener('submit', this.#editFormSubmitHandler);
     this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#editFormCancelHandler);
     this.element.querySelector('.event__type-group').addEventListener('change', this.#pointTypeChangeHandler);
-    this.element.querySelector('.event__input--destination').addEventListener('change', this.#pointDestinationHandler);
+    this.element.querySelector('.event__input--destination').addEventListener('change', this.#pointDestinationChangeHandler);
+    this.element.querySelector('.event__details').addEventListener('change',this.#pointOfferChangeHandler);
   }
 
   get template() {
-    return createEditPointTemplate(this.#destination, this._state, this.#mode);
+    return createEditPointTemplate(this._state, this.#mode);
   }
 
   #editFormSubmitHandler = (evt) => {
@@ -202,31 +205,55 @@ export default class CreationOrEditingView extends AbstractStatefulView {
 
   #pointTypeChangeHandler = (evt) => {
     evt.preventDefault();
+    this.#offersForType = this.#allOffers.find((offer) => offer.type === evt.target.value).offers;
     this.updateElement({
       type: evt.target.value,
       offers: null,
-      offersForType: this.#allOffers.find((offer) => offer.type === evt.target.value).offers,
+      offersForType: this.#offersForType,
     });
   };
 
-  #pointDestinationHandler = (evt) => {
+  #pointDestinationChangeHandler = (evt) => {
     evt.preventDefault();
     this.updateElement({
-      destination: this.#allDestinations.find((destination) => destination.name === evt.target.value).id,
+      destination: this.#allDestinations.find((destination) => destination.name === evt.target.value),
     });
   };
 
-  static parsePointToState(point, offersForType) {
-    return {...point, offersForType: offersForType};
+  #pointOfferChangeHandler = (evt) => {
+    evt.preventDefault();
+    const checkedOfferName = evt.target.name.split('-').pop();
+    const checkingOffer = this.#offersForType.find((offer) => offer.title.split(' ').pop() === checkedOfferName);
+    if (evt.target.checked) {
+      this.#checkedOffers.push(checkingOffer);
+    } else {
+      const indexCheckingOffer = this.#checkedOffers.findIndex((checkedOffer) => checkedOffer.id === checkingOffer.id);
+      this.#checkedOffers.splice(indexCheckingOffer, 1);
+    }
+    this.updateElement({
+      offers: this.#checkedOffers,
+    });
+  };
+
+  static parsePointToState(point, offersForType, checkedOffers, destination) {
+    const dateFrom = dayjs(point.dateFrom).toString();
+    const dateTo = dayjs(point.dateTo).toString();
+    return {...point, dateFrom: dateFrom, dateTo: dateTo, offers: checkedOffers, offersForType: offersForType, destination: destination};
   }
 
   static parseStateToPoint(state) {
-    return state;
+    const point = {... state};
+
+    point.offers = state.offers?.map((offer) => offer.id);
+    point.destination = state.destination.id;
+    delete point.offersForType;
+
+    return point;
   }
 
-  reset(point, offersForType) {
+  reset(point, offersForType, checkedOffers, destination) {
     this.updateElement(
-      CreationOrEditingView.parsePointToState(point, offersForType)
+      CreationOrEditingView.parsePointToState(point, offersForType, checkedOffers, destination)
     );
   }
 }

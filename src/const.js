@@ -1,3 +1,5 @@
+import dayjs from 'dayjs';
+
 const Time = {
   HOURS_PER_DAY: 24,
   MINUTES_PER_HOUR: 60,
@@ -42,7 +44,7 @@ const sortings = [
   {
     name: 'day',
     attribute: 'checked',
-    func: (point1, point2) => point1.dateFrom - point2.dateFrom,
+    func: (point1, point2) => dayjs(point1.dateFrom) - dayjs(point2.dateFrom),
   },
   {
     name: 'event',
@@ -52,7 +54,7 @@ const sortings = [
   {
     name: 'time',
     attribute: '',
-    func: (point1, point2) => (point2.dateTo - point2.dateFrom) - (point1.dateTo - point1.dateFrom),
+    func: (point1, point2) => (dayjs(point2.dateTo) - dayjs(point2.dateFrom)) - (dayjs(point1.dateTo) - dayjs(point1.dateFrom)),
   },
   {
     name: 'price',

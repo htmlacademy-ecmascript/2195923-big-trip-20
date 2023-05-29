@@ -7,7 +7,7 @@ dayjs.extend(duration);
 const formatDate = (date, format) => dayjs(date).format(format);
 
 const formatDuration = (dateFrom, dateTo) => {
-  const durationInMinutes = dateTo.diff(dateFrom, 'minute');
+  const durationInMinutes = dayjs(dateTo).diff(dayjs(dateFrom), 'minute');
   let dateFormat = '';
   let days = 0;
   let hours = 0;

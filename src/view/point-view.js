@@ -6,9 +6,7 @@ const createListOffersInTemplate = (checkedOffers) => {
 
   const eventList = document.createElement('ul');
   eventList.classList.add('event__selected-offers');
-
   for (let i = 0; i < checkedOffers.length; i++) {
-
     const eventOffer =
       `<li class="event__offer">
         <span class="event__offer-title">${checkedOffers[i].title}</span>
