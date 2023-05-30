@@ -267,7 +267,9 @@ export default class CreationOrEditingView extends AbstractStatefulView {
       {
         enableTime: true,
         dateFormat: 'd/m/y H:i',
+        defaultDate: this._state.dateFrom,
         time_24hr: true,
+        maxDate: this._state.dateTo,
         onClose: this.#pointStartDateAndTimeChangeHandler,
       },
     );
@@ -277,7 +279,9 @@ export default class CreationOrEditingView extends AbstractStatefulView {
       {
         enableTime: true,
         dateFormat: 'd/m/y H:i',
+        defaultDate: this._state.dateTo,
         time_24hr: true,
+        minDate: this._state.dateFrom,
         onClose: this.#pointEndDateAndTimeChangeHandler,
       },
     );
