@@ -184,6 +184,7 @@ export default class CreationOrEditingView extends AbstractStatefulView {
     this.element.querySelector('.event__type-group').addEventListener('change', this.#pointTypeChangeHandler);
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#pointDestinationChangeHandler);
     this.element.querySelector('.event__details').addEventListener('change',this.#pointOfferChangeHandler);
+    this.element.querySelector('.event__input--price').addEventListener('change', this.#pointPriceChangeHandler);
 
     this.#setDatepickers();
   }
@@ -247,6 +248,13 @@ export default class CreationOrEditingView extends AbstractStatefulView {
         offers: [...cloneOffers],
       });
     }
+  };
+
+  #pointPriceChangeHandler = (evt) => {
+    evt.preventDefault();
+    this.updateElement({
+      basePrice: evt.target.value,
+    });
   };
 
   #pointStartDateAndTimeChangeHandler = ([userDateAndTime]) => {
