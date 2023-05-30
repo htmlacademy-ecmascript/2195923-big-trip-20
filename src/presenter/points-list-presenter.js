@@ -71,10 +71,11 @@ export default class PointsListPresenter {
   #handlePointChange = (updatedPoint) => {
     this.#routePoints = updateItem(this.#routePoints, updatedPoint);
     this.#pointPresenters.get(updatedPoint.id).init({point: updatedPoint, destinations: this.#destinations, offers: this.#offers});
+    this.#handleSortTypeChange(this.#currentSortType, true);
   };
 
-  #handleSortTypeChange = (sortType) => {
-    if (this.#currentSortType === sortType) {
+  #handleSortTypeChange = (sortType, isSaving = false) => {
+    if (this.#currentSortType === sortType && !isSaving) {
       return;
     }
     const sortFunction = sortings.find((sortElement) => sortElement.name === sortType).func;

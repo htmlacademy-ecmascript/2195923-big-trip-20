@@ -162,8 +162,8 @@ export default class CreationOrEditingView extends AbstractStatefulView {
   #mode = null;
   #handleEditFormSubmit = null;
   #handleEditFormCancel = null;
-  #datepickerForStartDate = null;
-  #datepickerForEndDate = null;
+  #datepickerForStartDateAndTime = null;
+  #datepickerForEndDateAndTime = null;
 
   constructor({allDestinations, destination, allOffers, offersForType, checkedOffers, point = blankPoint, mode = Mode.CREATE, onEditFormSubmit, onEditFormCancel}) {
     super();
@@ -195,13 +195,13 @@ export default class CreationOrEditingView extends AbstractStatefulView {
   removeElement() {
     super.removeElement();
 
-    if(this.#datepickerForStartDate) {
-      this.#datepickerForStartDate.destroy();
-      this.#datepickerForStartDate = null;
+    if(this.#datepickerForStartDateAndTime) {
+      this.#datepickerForStartDateAndTime.destroy();
+      this.#datepickerForStartDateAndTime = null;
     }
-    if(this.#datepickerForEndDate) {
-      this.#datepickerForEndDate.destroy();
-      this.#datepickerForEndDate = null;
+    if(this.#datepickerForEndDateAndTime) {
+      this.#datepickerForEndDateAndTime.destroy();
+      this.#datepickerForEndDateAndTime = null;
     }
   }
 
@@ -249,38 +249,36 @@ export default class CreationOrEditingView extends AbstractStatefulView {
     }
   };
 
-  #pointStartDateChangeHandler = ([userDate]) => {
-    console.log(userDate);
+  #pointStartDateAndTimeChangeHandler = ([userDateAndTime]) => {
     this.updateElement({
-      dateFrom: userDate,
+      dateFrom: userDateAndTime,
     });
   };
 
-  #pointEndDateChangeHandler = ([userDate]) => {
-    console.log(userDate);
+  #pointEndDateAndTimeChangeHandler = ([userDateAndTime]) => {
     this.updateElement({
-      dateTo: userDate,
+      dateTo: userDateAndTime,
     });
   };
 
   #setDatepickers() {
-    this.#datepickerForStartDate = flatpickr(
+    this.#datepickerForStartDateAndTime = flatpickr(
       this.element.querySelector('#event-start-time-1'),
       {
         enableTime: true,
         dateFormat: 'd/m/y H:i',
         time_24hr: true,
-        onClose: this.#pointStartDateChangeHandler,
+        onClose: this.#pointStartDateAndTimeChangeHandler,
       },
     );
 
-    this.#datepickerForEndDate = flatpickr(
+    this.#datepickerForEndDateAndTime = flatpickr(
       this.element.querySelector('#event-end-time-1'),
       {
         enableTime: true,
         dateFormat: 'd/m/y H:i',
         time_24hr: true,
-        onClose: this.#pointEndDateChangeHandler,
+        onClose: this.#pointEndDateAndTimeChangeHandler,
       },
     );
   }
