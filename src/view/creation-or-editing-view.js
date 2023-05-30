@@ -2,6 +2,9 @@ import { DateFormat, Mode } from '../const.js';
 import { formatDate } from '../utils.js';
 import { destinationNames, routePointTypes } from '../mock/const.js';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
+import flatpickr from 'flatpickr';
+
+import 'flatpickr/dist/flatpickr.min.css';
 
 const blankPoint = {
   basePrice: 0,
@@ -159,6 +162,8 @@ export default class CreationOrEditingView extends AbstractStatefulView {
   #mode = null;
   #handleEditFormSubmit = null;
   #handleEditFormCancel = null;
+  #datepickerForStartDateAndTime = null;
+  #datepickerForEndDateAndTime = null;
 
   constructor({allDestinations, destination, allOffers, offersForType, checkedOffers, point = blankPoint, mode = Mode.CREATE, onEditFormSubmit, onEditFormCancel}) {
     super();
@@ -179,10 +184,26 @@ export default class CreationOrEditingView extends AbstractStatefulView {
     this.element.querySelector('.event__type-group').addEventListener('change', this.#pointTypeChangeHandler);
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#pointDestinationChangeHandler);
     this.element.querySelector('.event__details').addEventListener('change',this.#pointOfferChangeHandler);
+    this.element.querySelector('.event__input--price').addEventListener('change', this.#pointPriceChangeHandler);
+
+    this.#setDatepickers();
   }
 
   get template() {
     return createEditPointTemplate(this._state, this.#mode);
+  }
+
+  removeElement() {
+    super.removeElement();
+
+    if(this.#datepickerForStartDateAndTime) {
+      this.#datepickerForStartDateAndTime.destroy();
+      this.#datepickerForStartDateAndTime = null;
+    }
+    if(this.#datepickerForEndDateAndTime) {
+      this.#datepickerForEndDateAndTime.destroy();
+      this.#datepickerForEndDateAndTime = null;
+    }
   }
 
   #editFormSubmitHandler = (evt) => {
@@ -228,6 +249,51 @@ export default class CreationOrEditingView extends AbstractStatefulView {
       });
     }
   };
+
+  #pointPriceChangeHandler = (evt) => {
+    evt.preventDefault();
+    this.updateElement({
+      basePrice: evt.target.value,
+    });
+  };
+
+  #pointStartDateAndTimeChangeHandler = ([userDateAndTime]) => {
+    this.updateElement({
+      dateFrom: userDateAndTime,
+    });
+  };
+
+  #pointEndDateAndTimeChangeHandler = ([userDateAndTime]) => {
+    this.updateElement({
+      dateTo: userDateAndTime,
+    });
+  };
+
+  #setDatepickers() {
+    this.#datepickerForStartDateAndTime = flatpickr(
+      this.element.querySelector('#event-start-time-1'),
+      {
+        enableTime: true,
+        dateFormat: 'd/m/y H:i',
+        defaultDate: this._state.dateFrom,
+        time_24hr: true,
+        maxDate: this._state.dateTo,
+        onClose: this.#pointStartDateAndTimeChangeHandler,
+      },
+    );
+
+    this.#datepickerForEndDateAndTime = flatpickr(
+      this.element.querySelector('#event-end-time-1'),
+      {
+        enableTime: true,
+        dateFormat: 'd/m/y H:i',
+        defaultDate: this._state.dateTo,
+        time_24hr: true,
+        minDate: this._state.dateFrom,
+        onClose: this.#pointEndDateAndTimeChangeHandler,
+      },
+    );
+  }
 
   static parsePointToState({point, offersForType, checkedOffers, destination}) {
     return {...point, offers: checkedOffers, offersForType, destination};
