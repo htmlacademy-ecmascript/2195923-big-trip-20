@@ -1,9 +1,10 @@
+import dayjs from 'dayjs';
 import { getPoint } from '../mock/point-mock.js';
 
 const POINT_COUNT = 5;
 
 export default class PointsModel {
-  #points = Array.from({length: POINT_COUNT}, getPoint).sort((point1, point2) => point1.dateFrom - point2.dateFrom);
+  #points = Array.from({length: POINT_COUNT}, getPoint).sort((point1, point2) => dayjs(point1.dateFrom) - dayjs(point2.dateFrom));
 
   get points() {
     return this.#points;
