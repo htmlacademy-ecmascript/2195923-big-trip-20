@@ -1,4 +1,5 @@
 import { nanoid } from 'nanoid';
+import dayjs from 'dayjs';
 import { getRandomInteger, generateDate } from './util.js';
 import { routePointTypes } from './const.js';
 import { getRandomDestinationId } from './destination-mock.js';
@@ -13,8 +14,8 @@ const getPoint = () => {
 
   return {
     basePrice: getRandomInteger(100, 200),
-    dateFrom: dateFirst.diff(dateSecond) < 0 ? dateFirst : dateSecond,
-    dateTo: dateFirst.diff(dateSecond) >= 0 ? dateFirst : dateSecond,
+    dateFrom: dayjs(dateFirst).diff(dayjs(dateSecond)) < 0 ? dateFirst : dateSecond,
+    dateTo: dayjs(dateFirst).diff(dayjs(dateSecond)) >= 0 ? dateFirst : dateSecond,
     destination: getRandomDestinationId(),
     id: nanoid(),
     isFavorite: Boolean(getRandomInteger(0, 1)),

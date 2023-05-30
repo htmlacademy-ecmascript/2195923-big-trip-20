@@ -58,13 +58,10 @@ export default class PointPresenter {
 
   #renderPoint({point, allDestinations, allOffers}) {
     this.#pointComponent = new PointView({
-      point,
+      point: point,
       destination: this.#destination,
       checkedOffers: this.#checkedOffers,
-      onEditClick: () => {
-        this.#replacePointToEditForm();
-        document.addEventListener('keydown', this.#escKeyDownHandler);
-      },
+      onEditClick: this.#handleEditClick,
       onFavoriteClick: this.#handleFavoriteClick
     });
 
@@ -77,11 +74,7 @@ export default class PointPresenter {
       checkedOffers: this.#checkedOffers,
       mode: Mode.EDIT,
       onEditFormSubmit: this.#handleEditFormSubmit,
-      onEditFormCancel: () => {
-        this.#pointEditComponent.reset(this.#point, this.#offersForType, this.#checkedOffers, this.#destination);
-        this.#replaceEditFormToPoint();
-        document.removeEventListener('keydown', this.#escKeyDownHandler);
-      }
+      onEditFormCancel: this.#handleEditFormCancel,
     });
 
     if (this.#prevPointComponent === null || this.#prevEditComponent === null) {
@@ -133,12 +126,23 @@ export default class PointPresenter {
     }
   };
 
+  #handleEditClick = () => {
+    this.#replacePointToEditForm();
+    document.addEventListener('keydown', this.#escKeyDownHandler);
+  };
+
   #handleFavoriteClick = () => {
     this.#handleDataChange({...this.#point, isFavorite: !this.#point.isFavorite});
   };
 
   #handleEditFormSubmit = (point) => {
     this.#handleDataChange(point);
+    this.#replaceEditFormToPoint();
+    document.removeEventListener('keydown', this.#escKeyDownHandler);
+  };
+
+  #handleEditFormCancel = () => {
+    this.#pointEditComponent.reset(this.#point, this.#offersForType, this.#checkedOffers, this.#destination);
     this.#replaceEditFormToPoint();
     document.removeEventListener('keydown', this.#escKeyDownHandler);
   };

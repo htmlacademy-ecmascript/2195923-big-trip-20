@@ -2,7 +2,6 @@ import { DateFormat, Mode } from '../const.js';
 import { formatDate } from '../utils.js';
 import { destinationNames, routePointTypes } from '../mock/const.js';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
-import dayjs from 'dayjs';
 
 const blankPoint = {
   basePrice: 0,
@@ -156,24 +155,17 @@ function createEditPointTemplate(point, mode) {
 
 export default class CreationOrEditingView extends AbstractStatefulView {
   #allDestinations = null;
-  #destination = null;
   #allOffers = null;
-  #offersForType = null;
-  #checkedOffers = null;
   #mode = null;
-  #point = null;
   #handleEditFormSubmit = null;
   #handleEditFormCancel = null;
 
   constructor({allDestinations, destination, allOffers, offersForType, checkedOffers, point = blankPoint, mode = Mode.CREATE, onEditFormSubmit, onEditFormCancel}) {
     super();
     this.#allDestinations = allDestinations;
-    this.#destination = destination;
     this.#allOffers = allOffers;
-    this.#offersForType = offersForType;
-    this.#checkedOffers = checkedOffers;
     this.#mode = mode;
-    this._setState(CreationOrEditingView.parsePointToState(point, this.#offersForType, this.#checkedOffers, this.#destination));
+    this._setState(CreationOrEditingView.parsePointToState({point, offersForType, checkedOffers, destination}));
 
     this.#handleEditFormSubmit = onEditFormSubmit;
     this.#handleEditFormCancel = onEditFormCancel;
@@ -205,12 +197,10 @@ export default class CreationOrEditingView extends AbstractStatefulView {
 
   #pointTypeChangeHandler = (evt) => {
     evt.preventDefault();
-    this.#offersForType = this.#allOffers.find((offer) => offer.type === evt.target.value).offers;
-    this.#checkedOffers = [];
     this.updateElement({
       type: evt.target.value,
-      offers: null,
-      offersForType: this.#offersForType,
+      offers: [],
+      offersForType: this.#allOffers.find((offer) => offer.type === evt.target.value).offers,
     });
   };
 
@@ -224,26 +214,27 @@ export default class CreationOrEditingView extends AbstractStatefulView {
   #pointOfferChangeHandler = (evt) => {
     evt.preventDefault();
     const checkedOfferName = evt.target.name.split('-').pop();
-    const checkingOffer = this.#offersForType.find((offer) => offer.title.split(' ').pop() === checkedOfferName);
+    const checkingOffer = this._state.offersForType.find((offer) => offer.title.split(' ').pop() === checkedOfferName);
     if (evt.target.checked) {
-      this.#checkedOffers.push(checkingOffer);
+      this.updateElement({
+        offers: [...this._state.offers, checkingOffer],
+      });
     } else {
-      const indexCheckingOffer = this.#checkedOffers.findIndex((checkedOffer) => checkedOffer.id === checkingOffer.id);
-      this.#checkedOffers.splice(indexCheckingOffer, 1);
+      const cloneOffers = structuredClone(this._state.offers);
+      const indexCheckingOffer = cloneOffers.findIndex((cloneOffer) => cloneOffer.id === checkingOffer.id);
+      cloneOffers.splice(indexCheckingOffer, 1);
+      this.updateElement({
+        offers: [...cloneOffers],
+      });
     }
-    this.updateElement({
-      offers: this.#checkedOffers,
-    });
   };
 
-  static parsePointToState(point, offersForType, checkedOffers, destination) {
-    const dateFrom = dayjs(point.dateFrom).toString();
-    const dateTo = dayjs(point.dateTo).toString();
-    return {...point, dateFrom: dateFrom, dateTo: dateTo, offers: checkedOffers, offersForType: offersForType, destination: destination};
+  static parsePointToState({point, offersForType, checkedOffers, destination}) {
+    return {...point, offers: checkedOffers, offersForType, destination};
   }
 
   static parseStateToPoint(state) {
-    const point = {... state};
+    const point = {...state};
 
     point.offers = state.offers?.map((offer) => offer.id);
     point.destination = state.destination.id;
@@ -254,7 +245,7 @@ export default class CreationOrEditingView extends AbstractStatefulView {
 
   reset(point, offersForType, checkedOffers, destination) {
     this.updateElement(
-      CreationOrEditingView.parsePointToState(point, offersForType, checkedOffers, destination)
+      CreationOrEditingView.parsePointToState({point, offersForType, checkedOffers, destination})
     );
   }
 }
