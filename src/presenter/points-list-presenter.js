@@ -92,6 +92,8 @@ export default class PointsListPresenter {
         // - обновить список (например, когда задача ушла в архив)
         break;
       case UpdateType.MAJOR:
+        this.#clearPointList();
+        this.#renderPointList();
         // - обновить всю доску (например, при переключении фильтра)
         break;
     }

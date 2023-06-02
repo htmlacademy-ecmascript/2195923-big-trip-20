@@ -160,12 +160,26 @@ export default class CreationOrEditingView extends AbstractStatefulView {
   #allDestinations = null;
   #allOffers = null;
   #mode = null;
+
   #handleEditFormSubmit = null;
+  #handleEditFormDelete = null;
   #handleEditFormCancel = null;
+
   #datepickerForStartDateAndTime = null;
   #datepickerForEndDateAndTime = null;
 
-  constructor({allDestinations, destination, allOffers, offersForType, checkedOffers, point = blankPoint, mode = Mode.CREATE, onEditFormSubmit, onEditFormCancel}) {
+  constructor({
+    allDestinations,
+    destination,
+    allOffers,
+    offersForType,
+    checkedOffers,
+    point = blankPoint,
+    mode = Mode.CREATE,
+    onEditFormSubmit,
+    onEditFormDelete,
+    onEditFormCancel
+  }) {
     super();
     this.#allDestinations = allDestinations;
     this.#allOffers = allOffers;
@@ -173,6 +187,7 @@ export default class CreationOrEditingView extends AbstractStatefulView {
     this._setState(CreationOrEditingView.parsePointToState({point, offersForType, checkedOffers, destination}));
 
     this.#handleEditFormSubmit = onEditFormSubmit;
+    this.#handleEditFormDelete = onEditFormDelete;
     this.#handleEditFormCancel = onEditFormCancel;
 
     this._restoreHandlers();
@@ -180,6 +195,7 @@ export default class CreationOrEditingView extends AbstractStatefulView {
 
   _restoreHandlers() {
     this.element.querySelector('.event--edit').addEventListener('submit', this.#editFormSubmitHandler);
+    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#editFormDeleteHandler);
     this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#editFormCancelHandler);
     this.element.querySelector('.event__type-group').addEventListener('change', this.#pointTypeChangeHandler);
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#pointDestinationChangeHandler);
@@ -209,6 +225,11 @@ export default class CreationOrEditingView extends AbstractStatefulView {
   #editFormSubmitHandler = (evt) => {
     evt.preventDefault();
     this.#handleEditFormSubmit(CreationOrEditingView.parseStateToPoint(this._state));
+  };
+
+  #editFormDeleteHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleEditFormDelete(CreationOrEditingView.parseStateToPoint(this._state));
   };
 
   #editFormCancelHandler = (evt) => {

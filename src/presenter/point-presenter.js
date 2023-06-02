@@ -87,6 +87,7 @@ export default class PointPresenter {
       mode: Mode.EDIT,
       onEditFormSubmit: this.#handleEditFormSubmit,
       onEditFormDelete: this.#handleEditFormDelete,
+      onEditFormCancel: this.#handleEditFormCancel,
     });
 
     if (this.#prevPointComponent === null || this.#prevEditComponent === null) {
@@ -159,7 +160,14 @@ export default class PointPresenter {
     document.removeEventListener('keydown', this.#escKeyDownHandler);
   };
 
-  #handleEditFormDelete = () => {
+  #handleEditFormDelete = (point) => {
+    this.#handleDataChange(
+      UserAction.DELETE_POINT,
+      UpdateType.MAJOR,
+      point);
+  };
+
+  #handleEditFormCancel = () => {
     this.#handleDataChange(
       UserAction.UPDATE_POINT,
       UpdateType.MINOR,
