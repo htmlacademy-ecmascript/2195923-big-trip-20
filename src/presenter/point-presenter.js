@@ -85,9 +85,9 @@ export default class PointPresenter {
       offersForType: this.#offersForType,
       checkedOffers: this.#checkedOffers,
       mode: Mode.EDIT,
-      onEditFormSubmit: this.#handleEditFormSubmit,
-      onEditFormDelete: this.#handleEditFormDelete,
-      onEditFormCancel: this.#handleEditFormCancel,
+      onCreatOrEditFormSubmit: this.#handleEditFormSubmit,
+      onCreateOrEditFormDelete: this.#handleEditFormDelete,
+      onCreateOrEditFormCancel: this.#handleEditFormCancel,
     });
 
     if (this.#prevPointComponent === null || this.#prevEditComponent === null) {
@@ -151,10 +151,10 @@ export default class PointPresenter {
       {...this.#point, isFavorite: !this.#point.isFavorite});
   };
 
-  #handleEditFormSubmit = (point) => {
+  #handleEditFormSubmit = (point, mode) => {
     this.#handleDataChange(
-      UserAction.UPDATE_POINT,
-      UpdateType.MINOR,
+      mode.EDIT ? UserAction.UPDATE_POINT : UserAction.ADD_POINT,
+      UpdateType.MAJOR,
       point);
     this.#replaceEditFormToPoint();
     document.removeEventListener('keydown', this.#escKeyDownHandler);

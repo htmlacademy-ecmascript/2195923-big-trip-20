@@ -27,6 +27,10 @@ export default class PointsListPresenter {
     return this.#pointsModel.points;
   }
 
+  get pointsListComponent() {
+    return this.#pointsListComponent;
+  }
+
   init() {
     this.#renderSort();
     this.#renderPointList();

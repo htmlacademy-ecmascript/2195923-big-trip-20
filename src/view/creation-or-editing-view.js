@@ -10,7 +10,7 @@ const blankPoint = {
   basePrice: 0,
   dateFrom: new Date(),
   dateTo: new Date(),
-  destination: destinationNames[0],
+  destination: '',
   id: 0,
   isFavorite: false,
   offers: [],
@@ -79,6 +79,9 @@ const createSectionOfOffersInTemplate = (offersForType, checkedOffers) => {
 };
 
 const createSectionOfDestinationInTemplate = (destination) => {
+  if (destination === undefined) {
+    return '';
+  }
   const { description, pictures } = destination;
   if (description.length === 0 && pictures.length === 0) {
     return '';
@@ -119,7 +122,7 @@ function createEditPointTemplate(point, mode) {
 
                 <div class="event__field-group  event__field-group--destination">
                   <label class="event__label  event__type-output" for="event-destination-1">${type}</label>
-                  <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination.name}" list="destination-list-1">
+                  <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination ? destination.name : ''}" list="destination-list-1">
                   <datalist id="destination-list-1">
                     ${createDestinationNamesInTemplate()}
                   </datalist>
@@ -176,9 +179,9 @@ export default class CreationOrEditingView extends AbstractStatefulView {
     checkedOffers,
     point = blankPoint,
     mode = Mode.CREATE,
-    onEditFormSubmit,
-    onEditFormDelete,
-    onEditFormCancel
+    onCreateOrEditFormSubmit,
+    onCreateOrEditFormDelete,
+    onCreateOrEditFormCancel
   }) {
     super();
     this.#allDestinations = allDestinations;
@@ -186,17 +189,19 @@ export default class CreationOrEditingView extends AbstractStatefulView {
     this.#mode = mode;
     this._setState(CreationOrEditingView.parsePointToState({point, offersForType, checkedOffers, destination}));
 
-    this.#handleEditFormSubmit = onEditFormSubmit;
-    this.#handleEditFormDelete = onEditFormDelete;
-    this.#handleEditFormCancel = onEditFormCancel;
+    this.#handleEditFormSubmit = onCreateOrEditFormSubmit;
+    this.#handleEditFormDelete = onCreateOrEditFormDelete;
+    this.#handleEditFormCancel = onCreateOrEditFormCancel;
 
     this._restoreHandlers();
   }
 
   _restoreHandlers() {
+    if (this.#mode === Mode.EDIT) {
+      this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#editFormCancelHandler);
+    }
     this.element.querySelector('.event--edit').addEventListener('submit', this.#editFormSubmitHandler);
     this.element.querySelector('.event__reset-btn').addEventListener('click', this.#editFormDeleteHandler);
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#editFormCancelHandler);
     this.element.querySelector('.event__type-group').addEventListener('change', this.#pointTypeChangeHandler);
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#pointDestinationChangeHandler);
     this.element.querySelector('.event__details').addEventListener('change',this.#pointOfferChangeHandler);
@@ -224,7 +229,7 @@ export default class CreationOrEditingView extends AbstractStatefulView {
 
   #editFormSubmitHandler = (evt) => {
     evt.preventDefault();
-    this.#handleEditFormSubmit(CreationOrEditingView.parseStateToPoint(this._state));
+    this.#handleEditFormSubmit(CreationOrEditingView.parseStateToPoint(this._state), this.#mode);
   };
 
   #editFormDeleteHandler = (evt) => {
