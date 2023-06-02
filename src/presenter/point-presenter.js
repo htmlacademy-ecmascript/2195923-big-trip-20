@@ -1,11 +1,13 @@
 import PointView from '../view/point-view.js';
 import CreationOrEditingView from '../view/creation-or-editing-view.js';
 import { render, replace, remove } from '../framework/render.js';
-import { Mode } from '../const.js';
+import { Mode, UserAction, UpdateType } from '../const.js';
 
 export default class PointPresenter {
   #point = null;
-  #offers = null;
+  #destinationsModel = null;
+  #offersModel = null;
+
   #offersForType = null;
   #checkedOffers = null;
   #destination = null;
@@ -22,25 +24,35 @@ export default class PointPresenter {
   #handleDataChange = null;
   #handleModeChange = null;
 
-  constructor({pointsListContainer, onDataChange, onModeChange}) {
+  constructor({pointsListContainer, models, onDataChange, onModeChange}) {
     this.#pointContainer = pointsListContainer;
     this.#handleDataChange = onDataChange;
     this.#handleModeChange = onModeChange;
+
+    this.#destinationsModel = models.destinationsModel;
+    this.#offersModel = models.offersModel;
   }
 
-  init({point, destinations, offers}) {
+  get destinations() {
+    return this.#destinationsModel.destinations;
+  }
+
+  get offers() {
+    return this.#offersModel.offers;
+  }
+
+  init({point}) {
     this.#point = point;
-    this.#offers = offers;
     this.#offersForType = this.#getOffersForType();
     this.#checkedOffers = this.#getCheckedOffers(this.#offersForType);
-    this.#destination = destinations.find((destinationElement) => destinationElement.id === this.#point.destination);
+    this.#destination = this.destinations.find((destinationElement) => destinationElement.id === this.#point.destination);
     this.#prevPointComponent = this.#pointComponent;
     this.#prevEditComponent = this.#pointEditComponent;
 
     this.#renderPoint({
       point: this.#point,
-      allDestinations: destinations,
-      allOffers: offers
+      allDestinations: this.destinations,
+      allOffers: this.offers
     });
   }
 
@@ -53,7 +65,7 @@ export default class PointPresenter {
   }
 
   #getOffersForType() {
-    return this.#offers.find((offer) => offer.type === this.#point.type).offers;
+    return this.offers.find((offer) => offer.type === this.#point.type).offers;
   }
 
   #renderPoint({point, allDestinations, allOffers}) {
@@ -74,7 +86,7 @@ export default class PointPresenter {
       checkedOffers: this.#checkedOffers,
       mode: Mode.EDIT,
       onEditFormSubmit: this.#handleEditFormSubmit,
-      onEditFormCancel: this.#handleEditFormCancel,
+      onEditFormDelete: this.#handleEditFormDelete,
     });
 
     if (this.#prevPointComponent === null || this.#prevEditComponent === null) {
@@ -132,16 +144,26 @@ export default class PointPresenter {
   };
 
   #handleFavoriteClick = () => {
-    this.#handleDataChange({...this.#point, isFavorite: !this.#point.isFavorite});
+    this.#handleDataChange(
+      UserAction.UPDATE_POINT,
+      UpdateType.PATCH,
+      {...this.#point, isFavorite: !this.#point.isFavorite});
   };
 
   #handleEditFormSubmit = (point) => {
-    this.#handleDataChange(point);
+    this.#handleDataChange(
+      UserAction.UPDATE_POINT,
+      UpdateType.MINOR,
+      point);
     this.#replaceEditFormToPoint();
     document.removeEventListener('keydown', this.#escKeyDownHandler);
   };
 
-  #handleEditFormCancel = () => {
+  #handleEditFormDelete = () => {
+    this.#handleDataChange(
+      UserAction.UPDATE_POINT,
+      UpdateType.MINOR,
+      point);
     this.#pointEditComponent.reset(this.#point, this.#offersForType, this.#checkedOffers, this.#destination);
     this.#replaceEditFormToPoint();
     document.removeEventListener('keydown', this.#escKeyDownHandler);

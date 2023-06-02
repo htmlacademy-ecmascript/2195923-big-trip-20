@@ -28,6 +28,4 @@ const formatDuration = (dateFrom, dateTo) => {
   return dayjs.duration({ minutes, hours, days }).format(dateFormat);
 };
 
-const updateItem = (items, update) => items.map((item) => item.id === update.id ? update : item);
-
-export { formatDate, formatDuration, updateItem };
+export { formatDate, formatDuration };

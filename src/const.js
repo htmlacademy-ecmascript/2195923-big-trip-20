@@ -68,6 +68,18 @@ const sortings = [
   }
 ];
 
+const UserAction = {
+  UPDATE_POINT: 'UPDATE_POINT',
+  ADD_POINT: 'ADD_POINT',
+  DELETE_POINT: 'DELETE_POINT',
+};
+
+const UpdateType = {
+  PATCH: 'PATCH',
+  MINOR: 'MINOR',
+  MAJOR: 'MAJOR',
+};
+
 const QUANTITY_OF_CITIES_IN_TRIP = 3;
 
-export { Time, DateFormat, Filter, Mode, LocationElement, KeyboardKey, sortings, QUANTITY_OF_CITIES_IN_TRIP };
+export { Time, DateFormat, Filter, Mode, LocationElement, KeyboardKey, sortings, QUANTITY_OF_CITIES_IN_TRIP, UserAction, UpdateType };
