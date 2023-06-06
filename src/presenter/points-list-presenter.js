@@ -14,6 +14,7 @@ export default class PointsListPresenter {
   #pointsModel = null;
   #offersModel = null;
   #destinationsModel = null;
+  #filtersModel = null;
 
   #pointPresenters = new Map();
   #currentSortType = sortings[0].name;
@@ -25,12 +26,21 @@ export default class PointsListPresenter {
     this.#pointsModel = models.pointsModel;
     this.#offersModel = models.offersModel;
     this.#destinationsModel = models.destinationsModel;
+    this.#filtersModel = models.filtersModel;
     this.#sortComponent = new SortView({onSortTypeChange: this.#handleSortTypeChange});
 
     this.#pointsModel.addObserver(this.#handleModelEvent);
+    this.#filtersModel.addObserver(this.#handleFiltersEvent);
   }
 
   get points() {
+    if (this.#filtersModel.filters === 'past') {
+      return this.#pointsModel.points.filter((point) => Date.parse(point.dateTo) < Date.now());
+    } else if (this.#filtersModel.filters === 'present') {
+      return this.#pointsModel.points.filter((point) => (Date.parse(point.dateFrom) < Date.now() && Date.parse(point.dateTo) > Date.now()));
+    } else if (this.#filtersModel.filters === 'future') {
+      return this.#pointsModel.points.filter((point) => Date.parse(point.dateFrom) > Date.now());
+    }
     return this.#pointsModel.points;
   }
 
@@ -153,6 +163,26 @@ export default class PointsListPresenter {
           render(this.#pointsListComponent, this.#pointsListContainer);
           this.#renderEmptyList();
         }
+        // - обновить всю доску (например, при переключении фильтра)
+        break;
+    }
+  };
+
+  #handleFiltersEvent = (updateType, filter) => {
+    console.log('work');
+    switch (updateType) {
+      case UpdateType.PATCH:
+        // - обновить часть списка (например, когда поменялось описание)
+        this.#pointPresenters.get(point.id).init({point, mode: Mode.DEFAULT});
+        break;
+      case UpdateType.MINOR:
+        this.#clearPointList();
+        this.#renderPointList();
+        // - обновить список (например, когда задача ушла в архив)
+        break;
+      case UpdateType.MAJOR:
+        this.#clearPointList();
+        this.#renderPointList();
         // - обновить всю доску (например, при переключении фильтра)
         break;
     }

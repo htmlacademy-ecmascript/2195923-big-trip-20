@@ -19,10 +19,10 @@ const DateFormat = {
 };
 
 const Filter = {
-  EVERYTHING: 'Everything',
-  PAST: 'Past',
-  PRESENT: 'Present',
-  FUTURE: 'Future',
+  EVERYTHING: 'everything',
+  PAST: 'past',
+  PRESENT: 'present',
+  FUTURE: 'future',
 };
 
 const Mode = {
