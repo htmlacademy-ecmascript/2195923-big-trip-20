@@ -9,7 +9,7 @@ import { sortings, UpdateType, UserAction, Mode, Message } from '../const.js';
 export default class PointsListPresenter {
   #pointsListComponent = new PointsListView();
   #emptyComponent = null;
-  #sortComponent = new SortView({onSortTypeChange: ''});
+  #sortComponent = null;
   #pointsListContainer = null;
   #pointsModel = null;
   #offersModel = null;
@@ -18,7 +18,6 @@ export default class PointsListPresenter {
   #pointPresenters = new Map();
   #currentSortType = sortings[0].name;
 
-  // #handleNewPointSaveOrCancel = null;
   #handleNewPoint = null;
 
   constructor(pointsListContainer, models) {
@@ -26,6 +25,7 @@ export default class PointsListPresenter {
     this.#pointsModel = models.pointsModel;
     this.#offersModel = models.offersModel;
     this.#destinationsModel = models.destinationsModel;
+    this.#sortComponent = new SortView({onSortTypeChange: this.#handleSortTypeChange});
 
     this.#pointsModel.addObserver(this.#handleModelEvent);
   }
@@ -61,6 +61,7 @@ export default class PointsListPresenter {
       render(this.#sortComponent, this.#pointsListContainer);
       render(this.#pointsListComponent, this.#pointsListContainer);
     }
+    this.#handleSortTypeChange('day', true);
     this.#handleModeChange();
     this.#renderPoint({
       point: {
@@ -103,7 +104,6 @@ export default class PointsListPresenter {
   }
 
   #renderSort() {
-    // this.#sortComponent = new SortView({onSortTypeChange: this.#handleSortTypeChange});
     render(this.#sortComponent, this.#pointsListContainer);
   }
 
@@ -120,15 +120,17 @@ export default class PointsListPresenter {
     switch (actionType) {
       case UserAction.UPDATE_POINT:
         this.#pointsModel.updatePoint(updateType, update);
+        this.#handleSortTypeChange(this.#currentSortType, true);
         break;
       case UserAction.ADD_POINT:
         this.#pointsModel.addPoint(updateType, update);
+        this.#handleSortTypeChange(this.#currentSortType, true);
         break;
       case UserAction.DELETE_POINT:
         this.#pointsModel.deletePoint(updateType, update);
+        this.#handleSortTypeChange(this.#currentSortType, true);
         break;
     }
-    //this.#handleSortTypeChange(this.#currentSortType, true);
   };
 
   #handleModelEvent = (updateType, point) => {
@@ -147,6 +149,7 @@ export default class PointsListPresenter {
         if (this.points.length) {
           this.#renderPointList();
         } else {
+          remove(this.#sortComponent);
           render(this.#pointsListComponent, this.#pointsListContainer);
           this.#renderEmptyList();
         }
