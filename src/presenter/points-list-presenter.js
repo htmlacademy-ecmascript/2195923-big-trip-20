@@ -1,3 +1,4 @@
+import { nanoid } from 'nanoid';
 import PointsListView from '../view/points-list-view.js';
 import SortView from '../view/sort-view.js';
 import { render } from '../framework/render.js';
@@ -34,19 +35,20 @@ export default class PointsListPresenter {
   }
 
   init({onNewPointSaveOrCancel}) {
+    this.#handleNewPointSaveOrCancel = onNewPointSaveOrCancel;
     this.#renderSort();
     this.#renderPointList();
-    this.#handleNewPointSaveOrCancel = onNewPointSaveOrCancel;
   }
 
   renderNewPoint = () => {
+    this.#handleModeChange();
     this.#renderPoint({
       point: {
         basePrice: 0,
         dateFrom: new Date(),
         dateTo: new Date(),
         destination: '',
-        id: 0,
+        id: nanoid(),
         isFavorite: false,
         offers: [],
         type: 'taxi',

@@ -124,9 +124,11 @@ export default class PointPresenter {
   }
 
   resetView() {
-    if (this.#mode !== Mode.DEFAULT) {
+    if (this.#mode === Mode.EDIT) {
       this.#pointEditComponent.reset(this.#point, this.#offersForType, this.#checkedOffers, this.#destination);
       this.#replaceEditFormToPoint();
+    } else if (this.#mode === Mode.CREATE) {
+      this.destroy();
     }
   }
 
@@ -152,6 +154,7 @@ export default class PointPresenter {
 
   #handleEditClick = () => {
     this.#replacePointToEditForm();
+    this.#handleNewPointCreateOrCancel();
     document.addEventListener('keydown', this.#escKeyDownHandler);
   };
 
