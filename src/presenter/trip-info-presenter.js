@@ -1,43 +1,34 @@
 import TripInfoView from '../view/trip-info-view.js';
 import NewPointButtonView from '../view/new-point-button-view.js';
-import CreationOrEditingView from '../view/creation-or-editing-view.js';
 import { render, remove, RenderPosition } from '../framework/render.js';
-import { UpdateType, UserAction, Mode } from '../const.js';
-import { destinationNames, routePointTypes } from '../mock/const.js';
+import { UpdateType } from '../const.js';
 
 export default class TripInfoPresenter {
   #tripInfoContainer = null;
   #tripInfoComponent = null;
   #newPointButtonComponent = null;
-  #pointCreateComponent = null;
-  #newPointCreateContainer = null;
 
   #pointsModel = null;
   #destinationsModel = null;
   #offersModel = null;
 
-  constructor(tripInfoContainer, newPointCreateContainer, models) {
+  #handlePointCreate = null;
+
+  constructor(tripInfoContainer, models, onPointCreate) {
     this.#tripInfoContainer = tripInfoContainer;
-    this.#newPointCreateContainer = newPointCreateContainer;
 
     const {pointsModel, destinationsModel, offersModel} = models;
     this.#pointsModel = pointsModel;
     this.#destinationsModel = destinationsModel;
     this.#offersModel = offersModel;
 
+    this.#handlePointCreate = onPointCreate;
+
     this.#pointsModel.addObserver(this.#handleModelEvent);
   }
 
   get #points() {
     return this.#pointsModel.points;
-  }
-
-  get #destinations() {
-    return this.#destinationsModel.destinations;
-  }
-
-  get #offers() {
-    return this.#offersModel.offers;
   }
 
   get #tripStartDate() {
@@ -71,8 +62,13 @@ export default class TripInfoPresenter {
     });
   }
 
+  enableNewPoint = () => {
+    this.#newPointButtonComponent.removeDisabledAttribute();
+  };
+
   #clearTripInfo() {
     remove(this.#tripInfoComponent);
+    remove(this.#newPointButtonComponent);
   }
 
   #renderTripInfo(data) {
@@ -94,11 +90,7 @@ export default class TripInfoPresenter {
     return this.#offersModel.getTotalPriceByTypeAndIds(point.type, point.offers);
   }
 
-  #getOffersForType() {
-    return this.#offers.find((offer) => offer.type === routePointTypes[0]).offers;
-  }
-
-  #handleModelEvent = (updateType, point) => {
+  #handleModelEvent = (updateType) => {
     switch (updateType) {
       case UpdateType.PATCH:
         // - обновить часть списка (например, когда поменялось описание)
@@ -115,24 +107,7 @@ export default class TripInfoPresenter {
     }
   };
 
-  #handleNewPointButtonClick = (evt) => {
-    this.#pointCreateComponent = new CreationOrEditingView({
-      allDestinations: this.#destinations,
-      allOffers: this.#offers,
-      offersForType: this.#getOffersForType(),
-      checkedOffers: [],
-      mode: Mode.CREATE,
-      onCreateOrEditFormSubmit: this.#handleCreateFormSubmit,
-      onCreateOrEditFormCancel: this.#handleCreateFormCancel,
-    });
-    render(this.#pointCreateComponent, this.#newPointCreateContainer.element, RenderPosition.AFTERBEGIN);
-  };
-
-  #handleCreateFormSubmit = () => {
-
-  };
-
-  #handleCreateFormCancel = () => {
-
+  #handleNewPointButtonClick = () => {
+    this.#handlePointCreate();
   };
 }

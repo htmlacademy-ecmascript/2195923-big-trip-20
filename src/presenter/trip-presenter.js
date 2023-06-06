@@ -34,19 +34,21 @@ export default class TripPresenter {
         offersModel: offersModel
       });
 
-    const pointsListComponent = pointsListPresenter.pointsListComponent;
+    const onPointCreate = pointsListPresenter.renderNewPoint;
 
     const tripInfoPresenter = new TripInfoPresenter(
       this.#tripComponent.tripInfoContainer,
-      pointsListComponent,
       {
         pointsModel: pointsModel,
         destinationsModel: destinationsModel,
         offersModel: offersModel
-      });
+      },
+      onPointCreate);
+
+    const onNewPointSaveOrCancel = tripInfoPresenter.enableNewPoint;
 
     render(new FilterView(), this.#tripComponent.tripFiltersContainer);
     tripInfoPresenter.init();
-    pointsListPresenter.init();
+    pointsListPresenter.init({onNewPointSaveOrCancel});
   }
 }

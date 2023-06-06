@@ -19,6 +19,11 @@ export default class NewPointButtonView extends AbstractView {
 
   #newPointButtonClickHandler = (evt) => {
     evt.preventDefault();
+    this.element.setAttribute('disabled', '');
     this.#handleNewPointButtonClick(evt);
+  };
+
+  removeDisabledAttribute = () => {
+    this.element.removeAttribute('disabled');
   };
 }

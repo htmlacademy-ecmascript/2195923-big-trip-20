@@ -2,7 +2,7 @@ import PointsListView from '../view/points-list-view.js';
 import SortView from '../view/sort-view.js';
 import { render } from '../framework/render.js';
 import PointPresenter from './point-presenter.js';
-import { sortings, UpdateType, UserAction } from '../const.js';
+import { sortings, UpdateType, UserAction, Mode } from '../const.js';
 
 export default class PointsListPresenter {
   #pointsListComponent = new PointsListView();
@@ -13,6 +13,8 @@ export default class PointsListPresenter {
 
   #pointPresenters = new Map();
   #currentSortType = sortings[0].name;
+
+  #handleNewPointSaveOrCancel = null;
 
   constructor(pointsListContainer, models) {
     this.#pointsListContainer = pointsListContainer;
@@ -31,19 +33,37 @@ export default class PointsListPresenter {
     return this.#pointsListComponent;
   }
 
-  init() {
+  init({onNewPointSaveOrCancel}) {
     this.#renderSort();
     this.#renderPointList();
+    this.#handleNewPointSaveOrCancel = onNewPointSaveOrCancel;
   }
 
-  #renderPoint({point}) {
+  renderNewPoint = () => {
+    this.#renderPoint({
+      point: {
+        basePrice: 0,
+        dateFrom: new Date(),
+        dateTo: new Date(),
+        destination: '',
+        id: 0,
+        isFavorite: false,
+        offers: [],
+        type: 'taxi',
+      },
+      mode: Mode.CREATE
+    });
+  };
+
+  #renderPoint({point, mode}) {
     const pointPresenter = new PointPresenter({
       pointsListContainer: this.#pointsListComponent,
       models: {offersModel: this.#offersModel, destinationsModel: this.#destinationsModel},
       onDataChange: this.#handleViewAction,
-      onModeChange: this.#handleModeChange
+      onModeChange: this.#handleModeChange,
+      onNewPointCreateOrCancel: this.#handleNewPointSaveOrCancel,
     });
-    pointPresenter.init({point});
+    pointPresenter.init({point, mode});
     this.#pointPresenters.set(point.id, pointPresenter);
   }
 
@@ -51,7 +71,7 @@ export default class PointsListPresenter {
     render(this.#pointsListComponent, this.#pointsListContainer);
 
     this.points.forEach((point) => {
-      this.#renderPoint({point: point});
+      this.#renderPoint({point: point, mode: Mode.DEFAULT});
     });
   }
 
@@ -88,7 +108,7 @@ export default class PointsListPresenter {
     switch (updateType) {
       case UpdateType.PATCH:
         // - обновить часть списка (например, когда поменялось описание)
-        this.#pointPresenters.get(point.id).init({point});
+        this.#pointPresenters.get(point.id).init({point, mode: Mode.DEFAULT});
         break;
       case UpdateType.MINOR:
         this.#clearPointList();

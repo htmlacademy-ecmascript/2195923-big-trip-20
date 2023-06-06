@@ -101,7 +101,7 @@ const createSectionOfDestinationInTemplate = (destination) => {
 
 function createEditPointTemplate(point, mode) {
   const { basePrice, dateFrom, dateTo, offers, offersForType, type, destination } = point;
-  const isEdit = mode === Mode.EDIT;
+  const isEdit = (mode === Mode.EDIT) || (mode === Mode.DEFAULT);
 
   return `<li class="trip-events__item">
             <form class="event event--edit" action="#" method="post">
@@ -164,6 +164,8 @@ export default class CreationOrEditingView extends AbstractStatefulView {
   #allOffers = null;
   #mode = null;
 
+  #handleCreateFormSubmit = null;
+  #handleCreateFormCancel = null;
   #handleEditFormSubmit = null;
   #handleEditFormDelete = null;
   #handleEditFormCancel = null;
@@ -178,10 +180,12 @@ export default class CreationOrEditingView extends AbstractStatefulView {
     offersForType,
     checkedOffers,
     point = blankPoint,
-    mode = Mode.CREATE,
+    mode = Mode.EDIT,
     onCreateOrEditFormSubmit,
     onCreateOrEditFormDelete,
-    onCreateOrEditFormCancel
+    onCreateOrEditFormCancel,
+    onCreateFormSubmit,
+    onCreateFormCancel
   }) {
     super();
     this.#allDestinations = allDestinations;
@@ -192,16 +196,23 @@ export default class CreationOrEditingView extends AbstractStatefulView {
     this.#handleEditFormSubmit = onCreateOrEditFormSubmit;
     this.#handleEditFormDelete = onCreateOrEditFormDelete;
     this.#handleEditFormCancel = onCreateOrEditFormCancel;
+    this.#handleCreateFormSubmit = onCreateFormSubmit;
+    this.#handleCreateFormCancel = onCreateFormCancel;
 
     this._restoreHandlers();
   }
 
   _restoreHandlers() {
-    if (this.#mode === Mode.EDIT) {
-      this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#editFormCancelHandler);
+    if (this.#mode !== Mode.CREATE) {
+      this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#editFormCancelHandler); //закрытие формы по стрелке вверх
+      this.element.querySelector('.event--edit').addEventListener('submit', this.#editFormSubmitHandler); // нажатие на кнопку Save при редактировании
+      this.element.querySelector('.event__reset-btn').addEventListener('click', this.#editFormDeleteHandler); //удаление точки в форме редактирования
     }
-    this.element.querySelector('.event--edit').addEventListener('submit', this.#editFormSubmitHandler);
-    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#editFormDeleteHandler);
+    if (this.#mode === Mode.CREATE) {
+      this.element.querySelector('.event__save-btn').addEventListener('click', this.#createFormSubmitHandler); // сохранение новой точки в форме создания
+      this.element.querySelector('.event__reset-btn').addEventListener('click', this.#createFormCancelHandler); //закрытие формы создания без сохранения
+    }
+
     this.element.querySelector('.event__type-group').addEventListener('change', this.#pointTypeChangeHandler);
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#pointDestinationChangeHandler);
     this.element.querySelector('.event__details').addEventListener('change',this.#pointOfferChangeHandler);
@@ -226,6 +237,16 @@ export default class CreationOrEditingView extends AbstractStatefulView {
       this.#datepickerForEndDateAndTime = null;
     }
   }
+
+  #createFormSubmitHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleCreateFormSubmit(CreationOrEditingView.parseStateToPoint(this._state));
+  };
+
+  #createFormCancelHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleCreateFormCancel();
+  };
 
   #editFormSubmitHandler = (evt) => {
     evt.preventDefault();
@@ -328,8 +349,9 @@ export default class CreationOrEditingView extends AbstractStatefulView {
   static parseStateToPoint(state) {
     const point = {...state};
 
+    point.basePrice = Number.parseInt(state.basePrice, 10);
     point.offers = state.offers?.map((offer) => offer.id);
-    point.destination = state.destination.id;
+    point.destination = state.destination?.id;
     delete point.offersForType;
 
     return point;
