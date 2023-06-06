@@ -4,7 +4,7 @@ import EmptyPointView from '../view/empty-point-view.js';
 import SortView from '../view/sort-view.js';
 import { render, remove } from '../framework/render.js';
 import PointPresenter from './point-presenter.js';
-import { sortings, UpdateType, UserAction, Mode, Message } from '../const.js';
+import { sortings, UpdateType, UserAction, Mode, Message, Filter } from '../const.js';
 
 export default class PointsListPresenter {
   #pointsListComponent = new PointsListView();
@@ -108,8 +108,8 @@ export default class PointsListPresenter {
     });
   }
 
-  #renderEmptyList() {
-    this.#emptyComponent = new EmptyPointView(Message.EVERYTHING);
+  #renderEmptyList(message) {
+    this.#emptyComponent = new EmptyPointView(message);
     render(this.#emptyComponent, this.#pointsListContainer);
   }
 
@@ -161,7 +161,7 @@ export default class PointsListPresenter {
         } else {
           remove(this.#sortComponent);
           render(this.#pointsListComponent, this.#pointsListContainer);
-          this.#renderEmptyList();
+          this.#renderEmptyList(Message.EVERYTHING);
         }
         // - обновить всю доску (например, при переключении фильтра)
         break;
@@ -169,21 +169,29 @@ export default class PointsListPresenter {
   };
 
   #handleFiltersEvent = (updateType, filter) => {
-    console.log('work');
     switch (updateType) {
       case UpdateType.PATCH:
-        // - обновить часть списка (например, когда поменялось описание)
-        this.#pointPresenters.get(point.id).init({point, mode: Mode.DEFAULT});
-        break;
       case UpdateType.MINOR:
-        this.#clearPointList();
-        this.#renderPointList();
-        // - обновить список (например, когда задача ушла в архив)
-        break;
       case UpdateType.MAJOR:
         this.#clearPointList();
-        this.#renderPointList();
-        // - обновить всю доску (например, при переключении фильтра)
+        if (this.points.length) {
+          remove(this.#emptyComponent);
+          render(this.#sortComponent, this.#pointsListContainer);
+          this.#renderPointList();
+        } else {
+          remove(this.#sortComponent);
+          remove(this.#emptyComponent);
+          render(this.#pointsListComponent, this.#pointsListContainer);
+          if (filter === Filter.FUTURE) {
+            this.#renderEmptyList(Message.FUTURE);
+          } else if (filter === Filter.PRESENT) {
+            this.#renderEmptyList(Message.PRESENT);
+          } else if (filter === Filter.PAST) {
+            this.#renderEmptyList(Message.PAST);
+          } else if (filter === Filter.EVERYTHING) {
+            this.#renderEmptyList(Message.EVERYTHING);
+          }
+        }
         break;
     }
   };
