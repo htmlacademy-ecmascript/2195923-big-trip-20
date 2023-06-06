@@ -1,12 +1,15 @@
 import { nanoid } from 'nanoid';
 import PointsListView from '../view/points-list-view.js';
+import EmptyPointView from '../view/empty-point-view.js';
 import SortView from '../view/sort-view.js';
-import { render } from '../framework/render.js';
+import { render, remove } from '../framework/render.js';
 import PointPresenter from './point-presenter.js';
-import { sortings, UpdateType, UserAction, Mode } from '../const.js';
+import { sortings, UpdateType, UserAction, Mode, Message } from '../const.js';
 
 export default class PointsListPresenter {
   #pointsListComponent = new PointsListView();
+  #emptyComponent = null;
+  #sortComponent = new SortView({onSortTypeChange: ''});
   #pointsListContainer = null;
   #pointsModel = null;
   #offersModel = null;
@@ -15,7 +18,8 @@ export default class PointsListPresenter {
   #pointPresenters = new Map();
   #currentSortType = sortings[0].name;
 
-  #handleNewPointSaveOrCancel = null;
+  // #handleNewPointSaveOrCancel = null;
+  #handleNewPoint = null;
 
   constructor(pointsListContainer, models) {
     this.#pointsListContainer = pointsListContainer;
@@ -35,12 +39,28 @@ export default class PointsListPresenter {
   }
 
   init({onNewPointSaveOrCancel}) {
-    this.#handleNewPointSaveOrCancel = onNewPointSaveOrCancel;
-    this.#renderSort();
-    this.#renderPointList();
+    this.#handleNewPoint = onNewPointSaveOrCancel;
+    if (this.points.length) {
+      this.#renderSort();
+      this.#renderPointList();
+    } else {
+      this.#renderEmptyList();
+    }
   }
 
+  #handleNewPointSaveOrCancel = () => {
+    this.#handleNewPoint();
+    if (!this.points.length) {
+      this.#renderEmptyList();
+    }
+  };
+
   renderNewPoint = () => {
+    if (this.#emptyComponent) {
+      remove(this.#emptyComponent);
+      render(this.#sortComponent, this.#pointsListContainer);
+      render(this.#pointsListComponent, this.#pointsListContainer);
+    }
     this.#handleModeChange();
     this.#renderPoint({
       point: {
@@ -77,9 +97,14 @@ export default class PointsListPresenter {
     });
   }
 
+  #renderEmptyList() {
+    this.#emptyComponent = new EmptyPointView(Message.EVERYTHING);
+    render(this.#emptyComponent, this.#pointsListContainer);
+  }
+
   #renderSort() {
-    const sortComponent = new SortView({onSortTypeChange: this.#handleSortTypeChange});
-    render(sortComponent, this.#pointsListContainer);
+    // this.#sortComponent = new SortView({onSortTypeChange: this.#handleSortTypeChange});
+    render(this.#sortComponent, this.#pointsListContainer);
   }
 
   #clearPointList() {
@@ -119,7 +144,12 @@ export default class PointsListPresenter {
         break;
       case UpdateType.MAJOR:
         this.#clearPointList();
-        this.#renderPointList();
+        if (this.points.length) {
+          this.#renderPointList();
+        } else {
+          render(this.#pointsListComponent, this.#pointsListContainer);
+          this.#renderEmptyList();
+        }
         // - обновить всю доску (например, при переключении фильтра)
         break;
     }

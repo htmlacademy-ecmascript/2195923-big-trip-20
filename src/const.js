@@ -19,8 +19,9 @@ const DateFormat = {
 };
 
 const Filter = {
-  EVERYTHING: 'Everthing',
+  EVERYTHING: 'Everything',
   PAST: 'Past',
+  PRESENT: 'Present',
   FUTURE: 'Future',
 };
 
@@ -80,6 +81,13 @@ const UpdateType = {
   MAJOR: 'MAJOR',
 };
 
+const Message = {
+  EVERYTHING: 'Click New Event to create your first point',
+  PAST: 'There are no past events now',
+  PRESENT: 'There are no present events now',
+  FUTURE: 'There are no future events now',
+};
+
 const QUANTITY_OF_CITIES_IN_TRIP = 3;
 
-export { Time, DateFormat, Filter, Mode, LocationElement, KeyboardKey, sortings, QUANTITY_OF_CITIES_IN_TRIP, UserAction, UpdateType };
+export { Time, DateFormat, Filter, Mode, Message, LocationElement, KeyboardKey, sortings, QUANTITY_OF_CITIES_IN_TRIP, UserAction, UpdateType };

@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import Observable from '../framework/observable.js';
 import { getPoint } from '../mock/point-mock.js';
 
-const POINT_COUNT = 5;
+const POINT_COUNT = 0;
 
 export default class PointsModel extends Observable {
   #points = Array.from({length: POINT_COUNT}, getPoint).sort((point1, point2) => dayjs(point1.dateFrom) - dayjs(point2.dateFrom));

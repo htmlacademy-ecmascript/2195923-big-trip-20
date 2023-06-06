@@ -52,14 +52,17 @@ export default class TripInfoPresenter {
   }
 
   init() {
-    const totalPrice = this.#calculateTotalPrice(this.#totalPrice);
+    this.#renderNewPointButton();
+    if (this.#points.length) {
+      const totalPrice = this.#calculateTotalPrice(this.#totalPrice);
 
-    this.#renderTripInfo({
-      tripStartDate: this.#tripStartDate,
-      tripEndDate: this.#tripEndDate,
-      totalPrice: totalPrice,
-      routeOfTrip: this.#routeOfTrip,
-    });
+      this.#renderTripInfo({
+        tripStartDate: this.#tripStartDate,
+        tripEndDate: this.#tripEndDate,
+        totalPrice: totalPrice,
+        routeOfTrip: this.#routeOfTrip,
+      });
+    }
   }
 
   enableNewPoint = () => {
@@ -71,11 +74,14 @@ export default class TripInfoPresenter {
     remove(this.#newPointButtonComponent);
   }
 
+  #renderNewPointButton() {
+    this.#newPointButtonComponent = new NewPointButtonView({onNewPointButtonClick: this.#handleNewPointButtonClick});
+    render(this.#newPointButtonComponent, this.#tripInfoContainer, RenderPosition.BEFOREEND);
+  }
+
   #renderTripInfo(data) {
     this.#tripInfoComponent = new TripInfoView(data);
-    this.#newPointButtonComponent = new NewPointButtonView({onNewPointButtonClick: this.#handleNewPointButtonClick});
     render(this.#tripInfoComponent, this.#tripInfoContainer, RenderPosition.AFTERBEGIN);
-    render(this.#newPointButtonComponent, this.#tripInfoContainer, RenderPosition.BEFOREEND);
   }
 
   #calculateTotalPrice(pointsBasePrice) {
