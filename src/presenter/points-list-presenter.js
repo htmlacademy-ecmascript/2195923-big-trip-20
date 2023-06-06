@@ -72,6 +72,7 @@ export default class PointsListPresenter {
       render(this.#pointsListComponent, this.#pointsListContainer);
     }
     this.#handleSortTypeChange('day', true);
+    this.#filtersModel.filters = Filter.EVERYTHING;
     this.#handleModeChange();
     this.#renderPoint({
       point: {

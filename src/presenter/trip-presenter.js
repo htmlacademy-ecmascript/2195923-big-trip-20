@@ -55,7 +55,6 @@ export default class TripPresenter {
       filtersModel
     );
 
-
     tripInfoPresenter.init();
     pointsListPresenter.init({onNewPointSaveOrCancel});
     filterPresenter.init();
