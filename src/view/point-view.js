@@ -21,7 +21,8 @@ const createListOffersInTemplate = (checkedOffers) => {
 
 function createPointTemplate(point, destination, checkedOffers) {
   const { basePrice, dateFrom, dateTo, isFavorite, type } = point;
-  const { name } = destination;
+  const name = destination ? destination.name : '';
+
   const listOffers = createListOffersInTemplate(checkedOffers);
 
   return (

@@ -1,6 +1,7 @@
+import Observable from '../framework/observable.js';
 import { getDestinations } from '../mock/destination-mock.js';
 
-export default class DestinationsModel {
+export default class DestinationsModel extends Observable {
   #destinations = getDestinations();
 
   get destinations() {

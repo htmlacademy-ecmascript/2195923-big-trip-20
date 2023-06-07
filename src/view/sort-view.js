@@ -30,7 +30,7 @@ export default class SortView extends AbstractView {
   constructor({onSortTypeChange}) {
     super();
     this.#handleSortTypeChange = onSortTypeChange;
-    this.element.addEventListener('change', this.#sortTypeChangeHandler);
+    this.setHandlers();
   }
 
   get template() {
@@ -42,4 +42,8 @@ export default class SortView extends AbstractView {
     const sortType = evt.target.id.split('-')[1];
     this.#handleSortTypeChange(sortType);
   };
+
+  setHandlers() {
+    this.element.addEventListener('change', this.#sortTypeChangeHandler);
+  }
 }
