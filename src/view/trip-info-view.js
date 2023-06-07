@@ -1,22 +1,23 @@
-import { formatDate } from '../utils.js';
+import { formatDate, encodeInputTripInfo } from '../utils.js';
 import { DateFormat } from '../const.js';
 import AbstractView from '../framework/view/abstract-view.js';
 
 const createRouteInTemplate = (routeOfTrip) => routeOfTrip.reduce((acc, pointOfRoute) => `${acc } &mdash; ${ (pointOfRoute === undefined) ? '...' : pointOfRoute}`);
 
 function createTripInfoTemplate(tripStartDate, tripEndDate, totalPrice, routeOfTrip) {
+  const {tripStartDateEncode, tripEndDateEncode, totalPriceEncode, routeOfTripEncode} = encodeInputTripInfo(tripStartDate, tripEndDate, totalPrice, routeOfTrip);
   return (
     `<section class="trip-main__trip-info  trip-info">
       <div class="trip-info__main">
-        <h1 class="trip-info__title">${createRouteInTemplate(routeOfTrip)}</h1>
+        <h1 class="trip-info__title">${createRouteInTemplate(routeOfTripEncode)}</h1>
 
         <p class="trip-info__dates">
-          ${formatDate(tripStartDate, DateFormat.ONLY_DATE_TERTIARY)}&nbsp;&mdash;&nbsp;${formatDate(tripEndDate, DateFormat.ONLY_DATE_TERTIARY)}
+          ${formatDate(tripStartDateEncode, DateFormat.ONLY_DATE_TERTIARY)}&nbsp;&mdash;&nbsp;${formatDate(tripEndDateEncode, DateFormat.ONLY_DATE_TERTIARY)}
         </p>
       </div>
 
       <p class="trip-info__cost">
-        Total: &euro;&nbsp;<span class="trip-info__cost-value">${totalPrice}</span>
+        Total: &euro;&nbsp;<span class="trip-info__cost-value">${totalPriceEncode}</span>
       </p>
     </section>`
   );

@@ -86,8 +86,8 @@ export default class PointsListPresenter {
     this.#renderPoint({
       point: {
         basePrice: 0,
-        dateFrom: new Date(),
-        dateTo: new Date(),
+        dateFrom: '',
+        dateTo: '',
         destination: '',
         id: nanoid(),
         isFavorite: false,

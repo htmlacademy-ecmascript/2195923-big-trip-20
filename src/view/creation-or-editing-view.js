@@ -1,5 +1,5 @@
 import { DateFormat, Mode } from '../const.js';
-import { formatDate } from '../utils.js';
+import { formatDate, encodePointToCreateOrEditForm } from '../utils.js';
 import { destinationNames, routePointTypes } from '../mock/const.js';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import flatpickr from 'flatpickr';
@@ -100,6 +100,7 @@ const createSectionOfDestinationInTemplate = (destination) => {
 
 
 function createEditPointTemplate(point, mode) {
+  point = encodePointToCreateOrEditForm(point);
   const { basePrice, dateFrom, dateTo, offers, offersForType, type, destination } = point;
   const isEdit = (mode === Mode.EDIT) || (mode === Mode.DEFAULT);
 
