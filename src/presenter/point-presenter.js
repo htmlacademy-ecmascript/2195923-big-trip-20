@@ -187,6 +187,7 @@ export default class PointPresenter {
   };
 
   #handleEditFormSubmit = (point) => {
+    console.log(point);
     this.#handleDataChange(
       UserAction.UPDATE_POINT,
       UpdateType.MAJOR,

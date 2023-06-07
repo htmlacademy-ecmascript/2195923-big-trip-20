@@ -300,9 +300,11 @@ export default class CreationOrEditingView extends AbstractStatefulView {
 
   #pointPriceChangeHandler = (evt) => {
     evt.preventDefault();
-    this.updateElement({
-      basePrice: evt.target.value,
-    });
+    if (evt.target.value instanceof Number) {
+      this.updateElement({
+        basePrice: evt.target.value,
+      });
+    }
   };
 
   #pointStartDateAndTimeChangeHandler = ([userDateAndTime]) => {

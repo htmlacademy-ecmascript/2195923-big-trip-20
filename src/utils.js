@@ -34,7 +34,6 @@ const encodePointToCreateOrEditForm = (point) => {
   point.basePrice = he.encode(point.basePrice.toString());
   point.dateFrom = he.encode(point.dateFrom.toString());
   point.dateTo = he.encode(point.dateTo.toString());
-  point.isFavorite = he.encode(point.isFavorite.toString());
   point.destination.description = he.encode(point.destination.description.toString());
   point.destination.name = he.encode(point.destination.name.toString());
 
@@ -60,7 +59,6 @@ const encodeInputToPointView = (point, destination, checkedOffers) => {
   point.basePrice = he.encode(point.basePrice.toString());
   point.dateFrom = he.encode(point.dateFrom.toString());
   point.dateTo = he.encode(point.dateTo.toString());
-  point.isFavorite = he.encode(point.isFavorite.toString());
   destination.name = he.encode(destination.name.toString());
 
   for (const offer of checkedOffers) {
@@ -68,16 +66,20 @@ const encodeInputToPointView = (point, destination, checkedOffers) => {
     offer.title = he.encode(offer.title.toString());
   }
 
-  return { point, destination, checkedOffers };
+  return { pointEncode: point, destinationEncode: destination, checkedOffersEncode: checkedOffers };
 };
 
 const encodeInputTripInfo = (tripStartDate, tripEndDate, totalPrice, routeOfTrip) => {
   tripStartDate = he.encode(tripStartDate.toString());
   tripEndDate = he.encode(tripEndDate.toString());
   totalPrice = he.encode(totalPrice.toString());
-  routeOfTrip = he.encode(routeOfTrip.toString());
+  const routeOfTripEncode = routeOfTrip.map((pointOfTrip) => {
+    if (pointOfTrip !== undefined) {
+      return he.encode(pointOfTrip.toString());
+    }
+  });
 
-  return { tripStartDate, tripEndDate, totalPrice, routeOfTrip };
+  return { tripStartDateEncode: tripStartDate, tripEndDateEncode: tripEndDate, totalPriceEncode: totalPrice, routeOfTripEncode: routeOfTripEncode };
 };
 
 export { formatDate, formatDuration, encodePointToCreateOrEditForm, encodeInputToPointView, encodeInputTripInfo };
