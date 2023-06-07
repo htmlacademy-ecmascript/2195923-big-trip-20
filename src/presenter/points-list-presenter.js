@@ -1,10 +1,9 @@
-import { nanoid } from 'nanoid';
 import PointsListView from '../view/points-list-view.js';
 import EmptyPointView from '../view/empty-point-view.js';
 import SortView from '../view/sort-view.js';
 import { render, remove, RenderPosition } from '../framework/render.js';
 import PointPresenter from './point-presenter.js';
-import { sortings, UpdateType, UserAction, Mode, Filter } from '../const.js';
+import { sortings, UpdateType, UserAction, Mode, Filter, BLANK_POINT } from '../const.js';
 
 export default class PointsListPresenter {
   #pointsListComponent = new PointsListView();
@@ -37,16 +36,7 @@ export default class PointsListPresenter {
   }
 
   get points() {
-    let filterPoint = null;
-    if (this.#filtersModel.filters === 'past') {
-      filterPoint = this.#pointsModel.points.filter((point) => Date.parse(point.dateTo) < Date.now());
-    } else if (this.#filtersModel.filters === 'present') {
-      filterPoint = this.#pointsModel.points.filter((point) => (Date.parse(point.dateFrom) < Date.now() && Date.parse(point.dateTo) > Date.now()));
-    } else if (this.#filtersModel.filters === 'future') {
-      filterPoint = this.#pointsModel.points.filter((point) => Date.parse(point.dateFrom) > Date.now());
-    } else {
-      filterPoint = this.#pointsModel.points;
-    }
+    const filterPoint = this.#pointsModel.points.filter(Filter[this.#filtersModel.filters.toUpperCase()].func);
     const sortFunction = sortings.find((sortElement) => sortElement.name === this.#currentSortType).func;
     return filterPoint.sort(sortFunction);
   }
@@ -79,21 +69,12 @@ export default class PointsListPresenter {
       render(this.#sortComponent, this.#pointsListContainer);
       render(this.#pointsListComponent, this.#pointsListContainer);
     }
-    this.#filtersModel.filters = Filter.EVERYTHING.type;
+    this.#filtersModel.setFilters('PATCH', Filter.EVERYTHING.type);
     this.#handleSortTypeChange('day', true);
 
     this.#handleModeChange();
     this.#renderPoint({
-      point: {
-        basePrice: 0,
-        dateFrom: '',
-        dateTo: '',
-        destination: '',
-        id: nanoid(),
-        isFavorite: false,
-        offers: [],
-        type: 'taxi',
-      },
+      point: BLANK_POINT,
       mode: Mode.CREATE
     });
   };
@@ -156,13 +137,11 @@ export default class PointsListPresenter {
   #handleModelEvent = (updateType, point) => {
     switch (updateType) {
       case UpdateType.PATCH:
-        // - обновить часть списка (например, когда поменялось описание)
         this.#pointPresenters.get(point.id).init({point, mode: Mode.DEFAULT});
         break;
       case UpdateType.MINOR:
         this.#clearPointList();
         this.#renderPointList();
-        // - обновить список (например, когда задача ушла в архив)
         break;
       case UpdateType.MAJOR:
         this.#clearPointList();
@@ -173,7 +152,6 @@ export default class PointsListPresenter {
           render(this.#pointsListComponent, this.#pointsListContainer);
           this.#renderEmptyList(Filter[this.#filtersModel.filters.toUpperCase()].message);
         }
-        // - обновить всю доску (например, при переключении фильтра)
         break;
     }
   };
@@ -181,12 +159,15 @@ export default class PointsListPresenter {
   #handleFiltersEvent = (updateType, filter) => {
     switch (updateType) {
       case UpdateType.PATCH:
+        this.#sortComponent.setHandlers();
+        break;
       case UpdateType.MINOR:
       case UpdateType.MAJOR:
         this.#clearPointList();
         if (this.points.length) {
           remove(this.#emptyComponent);
           render(this.#sortComponent, this.#pointsListContainer);
+          this.#sortComponent.setHandlers();
           this.#renderPointList();
         } else {
           remove(this.#sortComponent);
@@ -216,8 +197,6 @@ export default class PointsListPresenter {
     if (this.#currentSortType === sortType && !isSaving) {
       return;
     }
-    // const sortFunction = sortings.find((sortElement) => sortElement.name === sortType).func;
-    // this.points.sort(sortFunction);
     this.#currentSortType = sortType;
     this.#clearPointList();
     this.#renderPointList();

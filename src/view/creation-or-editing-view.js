@@ -1,5 +1,5 @@
 import { DateFormat, Mode } from '../const.js';
-import { formatDate, encodePointToCreateOrEditForm } from '../utils.js';
+import { formatDate } from '../utils.js';
 import { destinationNames, routePointTypes } from '../mock/const.js';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import flatpickr from 'flatpickr';
@@ -100,7 +100,6 @@ const createSectionOfDestinationInTemplate = (destination) => {
 
 
 function createEditPointTemplate(point, mode) {
-  // point = encodePointToCreateOrEditForm(point);
   const { basePrice, dateFrom, dateTo, offers, offersForType, type, destination } = point;
   const isEdit = (mode === Mode.EDIT) || (mode === Mode.DEFAULT);
 
@@ -182,9 +181,9 @@ export default class CreationOrEditingView extends AbstractStatefulView {
     checkedOffers,
     point = blankPoint,
     mode = Mode.EDIT,
-    onCreateOrEditFormSubmit,
-    onCreateOrEditFormDelete,
-    onCreateOrEditFormCancel,
+    onEditFormSubmit,
+    onEditFormDelete,
+    onEditFormCancel,
     onCreateFormSubmit,
     onCreateFormCancel
   }) {
@@ -194,9 +193,9 @@ export default class CreationOrEditingView extends AbstractStatefulView {
     this.#mode = mode;
     this._setState(CreationOrEditingView.parsePointToState({point, offersForType, checkedOffers, destination}));
 
-    this.#handleEditFormSubmit = onCreateOrEditFormSubmit;
-    this.#handleEditFormDelete = onCreateOrEditFormDelete;
-    this.#handleEditFormCancel = onCreateOrEditFormCancel;
+    this.#handleEditFormSubmit = onEditFormSubmit;
+    this.#handleEditFormDelete = onEditFormDelete;
+    this.#handleEditFormCancel = onEditFormCancel;
     this.#handleCreateFormSubmit = onCreateFormSubmit;
     this.#handleCreateFormCancel = onCreateFormCancel;
 

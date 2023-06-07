@@ -9,8 +9,8 @@ export default class FiltersModel extends Observable {
     return this.#filters;
   }
 
-  set filters(currentFilter) {
+  setFilters = (typeEvent, currentFilter) => {
     this.#filters = currentFilter;
-    this._notify('MAJOR', this.#filters);
-  }
+    this._notify(typeEvent, this.#filters);
+  };
 }

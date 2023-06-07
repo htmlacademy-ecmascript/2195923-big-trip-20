@@ -89,9 +89,9 @@ export default class PointPresenter {
       offersForType: this.#offersForType,
       checkedOffers: this.#checkedOffers,
       mode: mode,
-      onCreateOrEditFormSubmit: this.#handleEditFormSubmit,
-      onCreateOrEditFormDelete: this.#handleEditFormDelete,
-      onCreateOrEditFormCancel: this.#handleEditFormCancel,
+      onEditFormSubmit: this.#handleEditFormSubmit,
+      onEditFormDelete: this.#handleEditFormDelete,
+      onEditFormCancel: this.#handleEditFormCancel,
       onCreateFormSubmit: this.#handleCreateFormSubmit,
       onCreateFormCancel: this.#handleCreateFormCancel,
     });
@@ -187,7 +187,6 @@ export default class PointPresenter {
   };
 
   #handleEditFormSubmit = (point) => {
-    console.log(point);
     this.#handleDataChange(
       UserAction.UPDATE_POINT,
       UpdateType.MAJOR,

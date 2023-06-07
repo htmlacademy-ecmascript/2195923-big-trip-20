@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import { nanoid } from 'nanoid';
 
 const Time = {
   HOURS_PER_DAY: 24,
@@ -21,19 +22,23 @@ const DateFormat = {
 const Filter = {
   EVERYTHING: {
     type: 'everything',
-    message: 'Click New Event to create your first point'
+    message: 'Click New Event to create your first point',
+    func: () => true,
   },
   PAST: {
     type: 'past',
-    message: 'There are no past events now'
+    message: 'There are no past events now',
+    func: (point) => Date.parse(point.dateTo) < Date.now(),
   },
   PRESENT: {
     type: 'present',
-    message: 'There are no present events now'
+    message: 'There are no present events now',
+    func: (point) => (Date.parse(point.dateFrom) < Date.now() && Date.parse(point.dateTo) > Date.now()),
   },
   FUTURE: {
     type: 'future',
-    message: 'There are no future events now'
+    message: 'There are no future events now',
+    func: (point) => Date.parse(point.dateFrom) > Date.now(),
   }
 };
 
@@ -43,15 +48,6 @@ const Mode = {
   CREATE: 'Create',
 };
 
-const LocationElement = {
-  BEFOREEND: 'beforeend',
-  AFTERBEGIN: 'afterbegin',
-};
-
-const KeyboardKey = {
-  ESCAPE: 'Escape',
-  ESC: 'Esc',
-};
 
 const sortings = [
   {
@@ -93,6 +89,15 @@ const UpdateType = {
   MAJOR: 'MAJOR',
 };
 
-const QUANTITY_OF_CITIES_IN_TRIP = 3;
+const BLANK_POINT = {
+  basePrice: 0,
+  dateFrom: '',
+  dateTo: '',
+  destination: '',
+  id: nanoid(),
+  isFavorite: false,
+  offers: [],
+  type: 'taxi',
+};
 
-export { Time, DateFormat, Filter, Mode, LocationElement, KeyboardKey, sortings, QUANTITY_OF_CITIES_IN_TRIP, UserAction, UpdateType };
+export { Time, DateFormat, Filter, Mode, sortings, UserAction, UpdateType, BLANK_POINT };

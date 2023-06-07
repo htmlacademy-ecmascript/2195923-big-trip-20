@@ -1,4 +1,4 @@
-import { formatDate, formatDuration, encodeInputToPointView } from '../utils.js';
+import { formatDate, formatDuration } from '../utils.js';
 import { DateFormat } from '../const.js';
 import AbstractView from '../framework/view/abstract-view.js';
 
@@ -20,7 +20,6 @@ const createListOffersInTemplate = (checkedOffers) => {
 };
 
 function createPointTemplate(point, destination, checkedOffers) {
-  // const {pointEncode, destinationEncode, checkedOffersEncode} = encodeInputToPointView(point, destination, checkedOffers);
   const { basePrice, dateFrom, dateTo, isFavorite, type } = point;
   const name = destination ? destination.name : '';
 

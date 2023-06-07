@@ -1,11 +1,10 @@
-import { formatDate, encodeInputTripInfo } from '../utils.js';
+import { formatDate } from '../utils.js';
 import { DateFormat } from '../const.js';
 import AbstractView from '../framework/view/abstract-view.js';
 
 const createRouteInTemplate = (routeOfTrip) => routeOfTrip.reduce((acc, pointOfRoute) => `${acc } &mdash; ${ (pointOfRoute === undefined) ? '...' : pointOfRoute}`);
 
 function createTripInfoTemplate(tripStartDate, tripEndDate, totalPrice, routeOfTrip) {
-  // const {tripStartDateEncode, tripEndDateEncode, totalPriceEncode, routeOfTripEncode} = encodeInputTripInfo(tripStartDate, tripEndDate, totalPrice, routeOfTrip);
   return (
     `<section class="trip-main__trip-info  trip-info">
       <div class="trip-info__main">

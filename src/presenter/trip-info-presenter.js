@@ -99,14 +99,10 @@ export default class TripInfoPresenter {
   #handleModelEvent = (updateType) => {
     switch (updateType) {
       case UpdateType.PATCH:
-        // - обновить часть списка (например, когда поменялось описание)
-
         break;
       case UpdateType.MINOR:
-        // - обновить список (например, когда задача ушла в архив)
         break;
       case UpdateType.MAJOR:
-        // - обновить всю доску (например, при переключении фильтра)
         this.#clearTripInfo();
         this.init();
         break;

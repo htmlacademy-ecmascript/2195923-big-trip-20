@@ -21,7 +21,7 @@ export default class FilterPresenter {
   }
 
   #handleFilterTypeChange = (filterType) => {
-    this.#filtersModel.filters = filterType;
+    this.#filtersModel.setFilters('MAJOR', filterType);
   };
 
   #handleNewPointButtonClick = () => {
