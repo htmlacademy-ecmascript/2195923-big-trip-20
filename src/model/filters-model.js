@@ -3,7 +3,7 @@ import { Filter } from '../const.js';
 
 
 export default class FiltersModel extends Observable {
-  #filters = Filter.EVERYTHING;
+  #filters = Filter.EVERYTHING.type;
 
   get filters() {
     return this.#filters;

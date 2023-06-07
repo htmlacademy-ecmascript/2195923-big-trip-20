@@ -2,9 +2,9 @@ import { nanoid } from 'nanoid';
 import PointsListView from '../view/points-list-view.js';
 import EmptyPointView from '../view/empty-point-view.js';
 import SortView from '../view/sort-view.js';
-import { render, remove } from '../framework/render.js';
+import { render, remove, RenderPosition } from '../framework/render.js';
 import PointPresenter from './point-presenter.js';
-import { sortings, UpdateType, UserAction, Mode, Message, Filter } from '../const.js';
+import { sortings, UpdateType, UserAction, Mode, Filter } from '../const.js';
 
 export default class PointsListPresenter {
   #pointsListComponent = new PointsListView();
@@ -15,6 +15,7 @@ export default class PointsListPresenter {
   #offersModel = null;
   #destinationsModel = null;
   #filtersModel = null;
+  #newPointButtonModel = null;
 
   #pointPresenters = new Map();
   #currentSortType = sortings[0].name;
@@ -27,21 +28,27 @@ export default class PointsListPresenter {
     this.#offersModel = models.offersModel;
     this.#destinationsModel = models.destinationsModel;
     this.#filtersModel = models.filtersModel;
+    this.#newPointButtonModel = models.newPointButtonModel;
     this.#sortComponent = new SortView({onSortTypeChange: this.#handleSortTypeChange});
 
     this.#pointsModel.addObserver(this.#handleModelEvent);
     this.#filtersModel.addObserver(this.#handleFiltersEvent);
+    this.#newPointButtonModel.addObserver(this.#handleSortEvent);
   }
 
   get points() {
+    let filterPoint = null;
     if (this.#filtersModel.filters === 'past') {
-      return this.#pointsModel.points.filter((point) => Date.parse(point.dateTo) < Date.now());
+      filterPoint = this.#pointsModel.points.filter((point) => Date.parse(point.dateTo) < Date.now());
     } else if (this.#filtersModel.filters === 'present') {
-      return this.#pointsModel.points.filter((point) => (Date.parse(point.dateFrom) < Date.now() && Date.parse(point.dateTo) > Date.now()));
+      filterPoint = this.#pointsModel.points.filter((point) => (Date.parse(point.dateFrom) < Date.now() && Date.parse(point.dateTo) > Date.now()));
     } else if (this.#filtersModel.filters === 'future') {
-      return this.#pointsModel.points.filter((point) => Date.parse(point.dateFrom) > Date.now());
+      filterPoint = this.#pointsModel.points.filter((point) => Date.parse(point.dateFrom) > Date.now());
+    } else {
+      filterPoint = this.#pointsModel.points;
     }
-    return this.#pointsModel.points;
+    const sortFunction = sortings.find((sortElement) => sortElement.name === this.#currentSortType).func;
+    return filterPoint.sort(sortFunction);
   }
 
   get pointsListComponent() {
@@ -66,13 +73,15 @@ export default class PointsListPresenter {
   };
 
   renderNewPoint = () => {
+    this.#newPointButtonModel.changeStateSwitch();
     if (this.#emptyComponent) {
       remove(this.#emptyComponent);
       render(this.#sortComponent, this.#pointsListContainer);
       render(this.#pointsListComponent, this.#pointsListContainer);
     }
+    this.#filtersModel.filters = Filter.EVERYTHING.type;
     this.#handleSortTypeChange('day', true);
-    this.#filtersModel.filters = Filter.EVERYTHING;
+
     this.#handleModeChange();
     this.#renderPoint({
       point: {
@@ -162,7 +171,7 @@ export default class PointsListPresenter {
         } else {
           remove(this.#sortComponent);
           render(this.#pointsListComponent, this.#pointsListContainer);
-          this.#renderEmptyList(Message.EVERYTHING);
+          this.#renderEmptyList(Filter[this.#filtersModel.filters.toUpperCase()].message);
         }
         // - обновить всю доску (например, при переключении фильтра)
         break;
@@ -183,26 +192,32 @@ export default class PointsListPresenter {
           remove(this.#sortComponent);
           remove(this.#emptyComponent);
           render(this.#pointsListComponent, this.#pointsListContainer);
-          if (filter === Filter.FUTURE) {
-            this.#renderEmptyList(Message.FUTURE);
-          } else if (filter === Filter.PRESENT) {
-            this.#renderEmptyList(Message.PRESENT);
-          } else if (filter === Filter.PAST) {
-            this.#renderEmptyList(Message.PAST);
-          } else if (filter === Filter.EVERYTHING) {
-            this.#renderEmptyList(Message.EVERYTHING);
+          if (filter === Filter.FUTURE.type) {
+            this.#renderEmptyList(Filter.FUTURE.message);
+          } else if (filter === Filter.PRESENT.type) {
+            this.#renderEmptyList(Filter.PRESENT.message);
+          } else if (filter === Filter.PAST.type) {
+            this.#renderEmptyList(Filter.PAST.message);
+          } else if (filter === Filter.EVERYTHING.type) {
+            this.#renderEmptyList(Filter.EVERYTHING.message);
           }
         }
         break;
     }
   };
 
+  #handleSortEvent = () => {
+    remove(this.#sortComponent);
+    render(this.#sortComponent, this.#pointsListContainer, RenderPosition.AFTERBEGIN);
+    this.#sortComponent.setHandlers();
+  };
+
   #handleSortTypeChange = (sortType, isSaving = false) => {
     if (this.#currentSortType === sortType && !isSaving) {
       return;
     }
-    const sortFunction = sortings.find((sortElement) => sortElement.name === sortType).func;
-    this.points.sort(sortFunction);
+    // const sortFunction = sortings.find((sortElement) => sortElement.name === sortType).func;
+    // this.points.sort(sortFunction);
     this.#currentSortType = sortType;
     this.#clearPointList();
     this.#renderPointList();

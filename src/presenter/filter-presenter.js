@@ -1,14 +1,18 @@
 import FilterView from '../view/filter-view.js';
-import { render } from '../framework/render.js';
+import { render, remove } from '../framework/render.js';
 
 export default class FilterPresenter {
   #filterComponent = null;
   #filterContainer = null;
   #filtersModel = null;
+  #newPointButtonModel = null;
 
-  constructor(filterContainer, filtersModel) {
+  constructor(filterContainer, models) {
     this.#filterContainer = filterContainer;
-    this.#filtersModel = filtersModel;
+    this.#filtersModel = models.filtersModel;
+    this.#newPointButtonModel = models.newPointButtonModel;
+
+    this.#newPointButtonModel.addObserver(this.#handleNewPointButtonClick);
   }
 
   init() {
@@ -18,5 +22,11 @@ export default class FilterPresenter {
 
   #handleFilterTypeChange = (filterType) => {
     this.#filtersModel.filters = filterType;
+  };
+
+  #handleNewPointButtonClick = () => {
+    remove(this.#filterComponent);
+    render(this.#filterComponent, this.#filterContainer);
+    this.#filterComponent.setHandlers();
   };
 }

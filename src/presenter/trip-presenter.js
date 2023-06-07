@@ -10,6 +10,7 @@ import PointsModel from '../model/points-model.js';
 import OffersModel from '../model/offers-model.js';
 import DestinationsModel from '../model/destinations-model.js';
 import FiltersModel from '../model/filters-model.js';
+import NewPointButtonModel from '../model/new-point-button-model.js';
 
 export default class TripPresenter {
   #tripContainer = null;
@@ -27,6 +28,7 @@ export default class TripPresenter {
     const offersModel = new OffersModel();
     const destinationsModel = new DestinationsModel();
     const filtersModel = new FiltersModel();
+    const newPointButtonModel = new NewPointButtonModel();
 
     const pointsListPresenter = new PointsListPresenter(
       this.#tripComponent.tripPointsContainer,
@@ -35,6 +37,7 @@ export default class TripPresenter {
         destinationsModel: destinationsModel,
         offersModel: offersModel,
         filtersModel: filtersModel,
+        newPointButtonModel: newPointButtonModel
       });
 
     const onPointCreate = pointsListPresenter.renderNewPoint;
@@ -51,8 +54,10 @@ export default class TripPresenter {
     const onNewPointSaveOrCancel = tripInfoPresenter.enableNewPoint;
 
     const filterPresenter = new FilterPresenter(
-      this.#tripComponent.tripFiltersContainer,
-      filtersModel
+      this.#tripComponent.tripFiltersContainer, {
+        filtersModel: filtersModel,
+        newPointButtonModel: newPointButtonModel
+      }
     );
 
     tripInfoPresenter.init();
