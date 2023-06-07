@@ -20,11 +20,11 @@ const createListOffersInTemplate = (checkedOffers) => {
 };
 
 function createPointTemplate(point, destination, checkedOffers) {
-  const {pointEncode, destinationEncode, checkedOffersEncode} = encodeInputToPointView(point, destination, checkedOffers);
-  const { basePrice, dateFrom, dateTo, isFavorite, type } = pointEncode;
-  const name = destinationEncode ? destinationEncode.name : '';
+  // const {pointEncode, destinationEncode, checkedOffersEncode} = encodeInputToPointView(point, destination, checkedOffers);
+  const { basePrice, dateFrom, dateTo, isFavorite, type } = point;
+  const name = destination ? destination.name : '';
 
-  const listOffers = createListOffersInTemplate(checkedOffersEncode);
+  const listOffers = createListOffersInTemplate(checkedOffers);
 
   return (
     `<li class="trip-events__item">

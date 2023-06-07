@@ -100,7 +100,7 @@ const createSectionOfDestinationInTemplate = (destination) => {
 
 
 function createEditPointTemplate(point, mode) {
-  point = encodePointToCreateOrEditForm(point);
+  // point = encodePointToCreateOrEditForm(point);
   const { basePrice, dateFrom, dateTo, offers, offersForType, type, destination } = point;
   const isEdit = (mode === Mode.EDIT) || (mode === Mode.DEFAULT);
 
@@ -300,11 +300,9 @@ export default class CreationOrEditingView extends AbstractStatefulView {
 
   #pointPriceChangeHandler = (evt) => {
     evt.preventDefault();
-    if (evt.target.value instanceof Number) {
-      this.updateElement({
-        basePrice: evt.target.value,
-      });
-    }
+    this.updateElement({
+      basePrice: evt.target.value,
+    });
   };
 
   #pointStartDateAndTimeChangeHandler = ([userDateAndTime]) => {

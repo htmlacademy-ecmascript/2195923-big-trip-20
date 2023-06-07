@@ -7,7 +7,7 @@ export default class NewPointButtonModel extends Observable {
     return this.#switch;
   }
 
-  changeStateSwitch() {
+  changeStateSwitchButton() {
     this.#switch = !this.#switch;
     this._notify('PATCH', this.#switch);
   }

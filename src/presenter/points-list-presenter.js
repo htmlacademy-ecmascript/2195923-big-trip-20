@@ -73,7 +73,7 @@ export default class PointsListPresenter {
   };
 
   renderNewPoint = () => {
-    this.#newPointButtonModel.changeStateSwitch();
+    this.#newPointButtonModel.changeStateSwitchButton();
     if (this.#emptyComponent) {
       remove(this.#emptyComponent);
       render(this.#sortComponent, this.#pointsListContainer);
