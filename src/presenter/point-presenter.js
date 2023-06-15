@@ -121,6 +121,8 @@ export default class PointPresenter {
 
     if (this.#mode === Mode.EDIT) {
       replace(this.#pointEditComponent, this.#prevEditComponent);
+      // replace(this.#pointComponent, this.#prevEditComponent);
+      // this.#mode = Mode.DEFAULT;
     }
 
     remove(this.#prevPointComponent);
@@ -138,6 +140,24 @@ export default class PointPresenter {
       this.#replaceEditFormToPoint();
     } else if (this.#mode === Mode.CREATE) {
       this.destroy();
+    }
+  }
+
+  setSaving() {
+    if (this.#mode === Mode.EDIT || this.#mode === Mode.CREATE) {
+      this.#pointEditComponent.updateElement({
+        isDisabled: true,
+        isSaving: true,
+      });
+    }
+  }
+
+  setDeleting() {
+    if (this.#mode === Mode.EDIT || this.#mode === Mode.CREATE) {
+      this.#pointEditComponent.updateElement({
+        isDisabled: true,
+        isDeleting: true,
+      });
     }
   }
 
@@ -183,7 +203,7 @@ export default class PointPresenter {
       UserAction.ADD_POINT,
       UpdateType.MAJOR,
       point);
-    this.#replaceEditFormToPoint();
+    // this.#replaceEditFormToPoint();
     this.#handleNewPointCreateOrCancel();
     document.removeEventListener('keydown', this.#escKeyDownHandler);
   };

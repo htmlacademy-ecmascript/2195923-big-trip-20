@@ -97,9 +97,18 @@ const createSectionOfDestinationInTemplate = (destination) => {
     </section>`;
 };
 
+function buttonNegativeText(isEdit, isDeleting) {
+  if (isEdit && isDeleting) {
+    return 'Deleting...';
+  } else if (isEdit && !isDeleting) {
+    return 'Delete';
+  } else {
+    return 'Cancel';
+  }
+}
 
 function createEditPointTemplate(point, mode, destinationsName) {
-  const { basePrice, dateFrom, dateTo, offers, offersForType, type, destination } = point;
+  const { basePrice, dateFrom, dateTo, offers, offersForType, type, destination, isDisabled, isSaving, isDeleting } = point;
   const isEdit = (mode === Mode.EDIT) || (mode === Mode.DEFAULT);
 
   return `<li class="trip-events__item">
@@ -143,8 +152,8 @@ function createEditPointTemplate(point, mode, destinationsName) {
                   <input class="event__input  event__input--price" id="event-price-1" type="number" min="0" name="event-price" value="${basePrice}">
                 </div>
 
-                <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-                <button class="event__reset-btn" type="reset">${isEdit ? 'Delete' : 'Cancel'}</button>
+                <button class="event__save-btn  btn  btn--blue" type="submit">${isSaving ? 'Saving...' : 'Save'}</button>
+                <button class="event__reset-btn" type="reset">${buttonNegativeText(isEdit, isDeleting)}</button>
                 ${isEdit ? `
                       <button class="event__rollup-btn" type = "button">
                         <span class="visually-hidden">Open event</span>
@@ -325,7 +334,7 @@ export default class CreationOrEditingView extends AbstractStatefulView {
         enableTime: true,
         dateFormat: 'd/m/y H:i',
         defaultDate: this._state.dateFrom,
-        time_24hr: true,
+        'time_24hr': true,
         maxDate: this._state.dateTo,
         onClose: this.#pointStartDateAndTimeChangeHandler,
       },
@@ -337,7 +346,7 @@ export default class CreationOrEditingView extends AbstractStatefulView {
         enableTime: true,
         dateFormat: 'd/m/y H:i',
         defaultDate: this._state.dateTo,
-        time_24hr: true,
+        'time_24hr': true,
         minDate: this._state.dateFrom,
         onClose: this.#pointEndDateAndTimeChangeHandler,
       },
@@ -345,7 +354,13 @@ export default class CreationOrEditingView extends AbstractStatefulView {
   }
 
   static parsePointToState({point, offersForType, checkedOffers, destination}) {
-    return {...point, offers: checkedOffers, offersForType, destination};
+    return {...point,
+      offers: checkedOffers,
+      offersForType,
+      destination,
+      isDisabled: false,
+      isSaving: false,
+      isDeleting: false};
   }
 
   static parseStateToPoint(state) {
@@ -355,6 +370,9 @@ export default class CreationOrEditingView extends AbstractStatefulView {
     point.offers = state.offers?.map((offer) => offer.id);
     point.destination = state.destination?.id;
     delete point.offersForType;
+    delete point.isDisabled;
+    delete point.isSaving;
+    delete point.isDeleting;
 
     return point;
   }

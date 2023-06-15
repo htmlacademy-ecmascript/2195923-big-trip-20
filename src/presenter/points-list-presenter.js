@@ -135,14 +135,17 @@ export default class PointsListPresenter {
   #handleViewAction = (actionType, updateType, update) => {
     switch (actionType) {
       case UserAction.UPDATE_POINT:
+        this.#pointPresenters.get(update.id).setSaving();
         this.#pointsModel.updatePoint(updateType, update);
         this.#handleSortTypeChange(this.#currentSortType, true);
         break;
       case UserAction.ADD_POINT:
+        this.#pointPresenters.get(update.id).setSaving();
         this.#pointsModel.addPoint(updateType, update);
         this.#handleSortTypeChange(this.#currentSortType, true);
         break;
       case UserAction.DELETE_POINT:
+        this.#pointPresenters.get(update.id).setDeleting();
         this.#pointsModel.deletePoint(updateType, update);
         this.#handleSortTypeChange(this.#currentSortType, true);
         break;
