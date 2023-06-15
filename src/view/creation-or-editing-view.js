@@ -1,6 +1,5 @@
-import { DateFormat, Mode } from '../const.js';
+import { DateFormat, Mode, routePointTypes } from '../const.js';
 import { formatDate } from '../utils.js';
-import { destinationNames, routePointTypes } from '../mock/const.js';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import flatpickr from 'flatpickr';
 
@@ -39,9 +38,9 @@ const createRoutePointTypesInTemplate = (type) => {
   return list;
 };
 
-const createDestinationNamesInTemplate = () => {
+const createDestinationNamesInTemplate = (destinationsName) => {
   let list = '';
-  for (const name of destinationNames) {
+  for (const name of destinationsName) {
     list += `<option value="${name}"></option>`;
   }
   return list;
@@ -66,7 +65,7 @@ const createListOfOffersInTemplate = (offersForType, checkedOffers) => {
 };
 
 const createSectionOfOffersInTemplate = (offersForType, checkedOffers) => {
-  if (offersForType.length !== 0) {
+  if (offersForType !== undefined) {
     return `
       <section class="event__section  event__section--offers">
         <h3 class="event__section-title  event__section-title--offers">Offers</h3>
@@ -99,7 +98,7 @@ const createSectionOfDestinationInTemplate = (destination) => {
 };
 
 
-function createEditPointTemplate(point, mode) {
+function createEditPointTemplate(point, mode, destinationsName) {
   const { basePrice, dateFrom, dateTo, offers, offersForType, type, destination } = point;
   const isEdit = (mode === Mode.EDIT) || (mode === Mode.DEFAULT);
 
@@ -124,7 +123,7 @@ function createEditPointTemplate(point, mode) {
                   <label class="event__label  event__type-output" for="event-destination-1">${type}</label>
                   <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination ? destination.name : ''}" list="destination-list-1">
                   <datalist id="destination-list-1">
-                    ${createDestinationNamesInTemplate()}
+                    ${createDestinationNamesInTemplate(destinationsName)}
                   </datalist>
                 </div>
 
@@ -163,6 +162,7 @@ export default class CreationOrEditingView extends AbstractStatefulView {
   #allDestinations = null;
   #allOffers = null;
   #mode = null;
+  #destinationsName = null;
 
   #handleCreateFormSubmit = null;
   #handleCreateFormCancel = null;
@@ -181,6 +181,7 @@ export default class CreationOrEditingView extends AbstractStatefulView {
     checkedOffers,
     point = blankPoint,
     mode = Mode.EDIT,
+    destinationsName,
     onEditFormSubmit,
     onEditFormDelete,
     onEditFormCancel,
@@ -191,6 +192,7 @@ export default class CreationOrEditingView extends AbstractStatefulView {
     this.#allDestinations = allDestinations;
     this.#allOffers = allOffers;
     this.#mode = mode;
+    this.#destinationsName = destinationsName;
     this._setState(CreationOrEditingView.parsePointToState({point, offersForType, checkedOffers, destination}));
 
     this.#handleEditFormSubmit = onEditFormSubmit;
@@ -222,7 +224,7 @@ export default class CreationOrEditingView extends AbstractStatefulView {
   }
 
   get template() {
-    return createEditPointTemplate(this._state, this.#mode);
+    return createEditPointTemplate(this._state, this.#mode, this.#destinationsName);
   }
 
   removeElement() {

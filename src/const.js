@@ -1,5 +1,4 @@
 import dayjs from 'dayjs';
-import { nanoid } from 'nanoid';
 
 const Time = {
   HOURS_PER_DAY: 24,
@@ -87,6 +86,7 @@ const UpdateType = {
   PATCH: 'PATCH',
   MINOR: 'MINOR',
   MAJOR: 'MAJOR',
+  INIT: 'INIT',
 };
 
 const BLANK_POINT = {
@@ -94,10 +94,24 @@ const BLANK_POINT = {
   dateFrom: '',
   dateTo: '',
   destination: '',
-  id: nanoid(),
   isFavorite: false,
   offers: [],
   type: 'taxi',
 };
 
-export { Time, DateFormat, Filter, Mode, sortings, UserAction, UpdateType, BLANK_POINT };
+const routePointTypes = [
+  'taxi',
+  'bus',
+  'train',
+  'ship',
+  'drive',
+  'flight',
+  'check-in',
+  'sightseeing',
+  'restaurant',
+];
+
+const AUTHORIZATION = 'Basic dPy4sfS45wcl1shg';
+const END_POINT = 'https://20.ecmascript.pages.academy/big-trip';
+
+export { Time, DateFormat, Filter, Mode, sortings, routePointTypes, UserAction, UpdateType, BLANK_POINT, AUTHORIZATION, END_POINT };

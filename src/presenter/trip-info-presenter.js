@@ -106,6 +106,10 @@ export default class TripInfoPresenter {
         this.#clearTripInfo();
         this.init();
         break;
+      case UpdateType.INIT:
+        this.#clearTripInfo();
+        this.init();
+        break;
     }
   };
 

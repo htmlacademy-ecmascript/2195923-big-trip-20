@@ -3,7 +3,9 @@ import { DateFormat } from '../const.js';
 import AbstractView from '../framework/view/abstract-view.js';
 
 const createListOffersInTemplate = (checkedOffers) => {
-
+  if (checkedOffers === undefined) {
+    return;
+  }
   const eventList = document.createElement('ul');
   eventList.classList.add('event__selected-offers');
   for (let i = 0; i < checkedOffers.length; i++) {
