@@ -111,7 +111,7 @@ const routePointTypes = [
   'restaurant',
 ];
 
-const AUTHORIZATION = 'Basic dPy4sfS45wcl1shg';
+const AUTHORIZATION = 'Basic dPy4sfS45wcl1sh2I';
 const END_POINT = 'https://20.ecmascript.pages.academy/big-trip';
 
 export { Time, DateFormat, Filter, Mode, sortings, routePointTypes, UserAction, UpdateType, BLANK_POINT, AUTHORIZATION, END_POINT };

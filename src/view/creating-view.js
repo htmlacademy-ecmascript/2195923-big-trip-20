@@ -1,20 +1,9 @@
-import { DateFormat, Mode, routePointTypes } from '../const.js';
+import { DateFormat, routePointTypes, BLANK_POINT } from '../const.js';
 import { formatDate } from '../utils.js';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import flatpickr from 'flatpickr';
 
 import 'flatpickr/dist/flatpickr.min.css';
-
-const blankPoint = {
-  basePrice: 0,
-  dateFrom: new Date(),
-  dateTo: new Date(),
-  destination: '',
-  id: 0,
-  isFavorite: false,
-  offers: [],
-  type: routePointTypes[0],
-};
 
 const createDescriptionOfPointInTemplate = (description) => `<p class="event__destination-description">${description}</p>`;
 
@@ -107,9 +96,8 @@ function buttonNegativeText(isEdit, isDeleting) {
   }
 }
 
-function createEditPointTemplate(point, mode, destinationsName) {
+function createPointTemplate(point, destinationsName) {
   const { basePrice, dateFrom, dateTo, offers, offersForType, type, destination, isDisabled, isSaving, isDeleting } = point;
-  const isEdit = (mode === Mode.EDIT) || (mode === Mode.DEFAULT);
 
   return `<li class="trip-events__item">
             <form class="event event--edit" action="#" method="post">
@@ -153,11 +141,7 @@ function createEditPointTemplate(point, mode, destinationsName) {
                 </div>
 
                 <button class="event__save-btn  btn  btn--blue" type="submit">${isSaving ? 'Saving...' : 'Save'}</button>
-                <button class="event__reset-btn" type="reset">${buttonNegativeText(isEdit, isDeleting)}</button>
-                ${isEdit ? `
-                      <button class="event__rollup-btn" type = "button">
-                        <span class="visually-hidden">Open event</span>
-                      </button >` : ''}
+                <button class="event__reset-btn" type="reset">${buttonNegativeText(false, isDeleting)}</button>
               </header>
               <section class="event__details">
                 ${createSectionOfOffersInTemplate(offersForType, offers)}
@@ -167,17 +151,13 @@ function createEditPointTemplate(point, mode, destinationsName) {
           </li>`;
 }
 
-export default class CreationOrEditingView extends AbstractStatefulView {
+export default class CreatingView extends AbstractStatefulView {
   #allDestinations = null;
   #allOffers = null;
-  #mode = null;
   #destinationsName = null;
 
   #handleCreateFormSubmit = null;
   #handleCreateFormCancel = null;
-  #handleEditFormSubmit = null;
-  #handleEditFormDelete = null;
-  #handleEditFormCancel = null;
 
   #datepickerForStartDateAndTime = null;
   #datepickerForEndDateAndTime = null;
@@ -188,25 +168,17 @@ export default class CreationOrEditingView extends AbstractStatefulView {
     allOffers,
     offersForType,
     checkedOffers,
-    point = blankPoint,
-    mode = Mode.EDIT,
+    point = BLANK_POINT,
     destinationsName,
-    onEditFormSubmit,
-    onEditFormDelete,
-    onEditFormCancel,
     onCreateFormSubmit,
     onCreateFormCancel
   }) {
     super();
     this.#allDestinations = allDestinations;
     this.#allOffers = allOffers;
-    this.#mode = mode;
     this.#destinationsName = destinationsName;
-    this._setState(CreationOrEditingView.parsePointToState({point, offersForType, checkedOffers, destination}));
+    this._setState(CreatingView.parsePointToState({point, offersForType, checkedOffers, destination}));
 
-    this.#handleEditFormSubmit = onEditFormSubmit;
-    this.#handleEditFormDelete = onEditFormDelete;
-    this.#handleEditFormCancel = onEditFormCancel;
     this.#handleCreateFormSubmit = onCreateFormSubmit;
     this.#handleCreateFormCancel = onCreateFormCancel;
 
@@ -214,16 +186,8 @@ export default class CreationOrEditingView extends AbstractStatefulView {
   }
 
   _restoreHandlers() {
-    if (this.#mode !== Mode.CREATE) {
-      this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#editFormCancelHandler); //закрытие формы по стрелке вверх
-      this.element.querySelector('.event--edit').addEventListener('submit', this.#editFormSubmitHandler); // нажатие на кнопку Save при редактировании
-      this.element.querySelector('.event__reset-btn').addEventListener('click', this.#editFormDeleteHandler); //удаление точки в форме редактирования
-    }
-    if (this.#mode === Mode.CREATE) {
-      this.element.querySelector('.event__save-btn').addEventListener('click', this.#createFormSubmitHandler); // сохранение новой точки в форме создания
-      this.element.querySelector('.event__reset-btn').addEventListener('click', this.#createFormCancelHandler); //закрытие формы создания без сохранения
-    }
-
+    this.element.querySelector('.event__save-btn').addEventListener('click', this.#createFormSubmitHandler); // сохранение новой точки в форме создания
+    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#createFormCancelHandler); //закрытие формы создания без сохранения
     this.element.querySelector('.event__type-group').addEventListener('change', this.#pointTypeChangeHandler);
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#pointDestinationChangeHandler);
     this.element.querySelector('.event__details').addEventListener('change',this.#pointOfferChangeHandler);
@@ -233,7 +197,7 @@ export default class CreationOrEditingView extends AbstractStatefulView {
   }
 
   get template() {
-    return createEditPointTemplate(this._state, this.#mode, this.#destinationsName);
+    return createPointTemplate(this._state, this.#destinationsName);
   }
 
   removeElement() {
@@ -251,27 +215,12 @@ export default class CreationOrEditingView extends AbstractStatefulView {
 
   #createFormSubmitHandler = (evt) => {
     evt.preventDefault();
-    this.#handleCreateFormSubmit(CreationOrEditingView.parseStateToPoint(this._state));
+    this.#handleCreateFormSubmit(CreatingView.parseStateToPoint(this._state));
   };
 
   #createFormCancelHandler = (evt) => {
     evt.preventDefault();
     this.#handleCreateFormCancel();
-  };
-
-  #editFormSubmitHandler = (evt) => {
-    evt.preventDefault();
-    this.#handleEditFormSubmit(CreationOrEditingView.parseStateToPoint(this._state), this.#mode);
-  };
-
-  #editFormDeleteHandler = (evt) => {
-    evt.preventDefault();
-    this.#handleEditFormDelete(CreationOrEditingView.parseStateToPoint(this._state));
-  };
-
-  #editFormCancelHandler = (evt) => {
-    evt.preventDefault();
-    this.#handleEditFormCancel();
   };
 
   #pointTypeChangeHandler = (evt) => {
@@ -379,7 +328,7 @@ export default class CreationOrEditingView extends AbstractStatefulView {
 
   reset(point, offersForType, checkedOffers, destination) {
     this.updateElement(
-      CreationOrEditingView.parsePointToState({point, offersForType, checkedOffers, destination})
+      CreatingView.parsePointToState({point, offersForType, checkedOffers, destination})
     );
   }
 }

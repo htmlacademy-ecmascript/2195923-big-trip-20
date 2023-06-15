@@ -20,6 +20,7 @@ export default class PointsListPresenter {
   #newPointButtonModel = null;
 
   #pointPresenters = new Map();
+  #creatingPointPresenters = null;
   #currentSortType = sortings[0].name;
 
   #handleNewPoint = null;
@@ -84,10 +85,14 @@ export default class PointsListPresenter {
     this.#handleSortTypeChange('day', true);
 
     this.#handleModeChange();
-    this.#renderPoint({
-      point: BLANK_POINT,
-      mode: Mode.CREATE
+    this.#creatingPointPresenters = new PointPresenter({
+      pointsListContainer: this.#pointsListComponent,
+      models: {offersModel: this.#offersModel, destinationsModel: this.#destinationsModel},
+      onDataChange: this.#handleViewAction,
+      onModeChange: this.#handleModeChange,
+      onNewPointCreateOrCancel: this.#handleNewPointSaveOrCancel,
     });
+    this.#creatingPointPresenters.init({point: BLANK_POINT, mode: Mode.CREATE});
   };
 
   #renderPoint({point, mode}) {
@@ -137,17 +142,14 @@ export default class PointsListPresenter {
       case UserAction.UPDATE_POINT:
         this.#pointPresenters.get(update.id).setSaving();
         this.#pointsModel.updatePoint(updateType, update);
-        this.#handleSortTypeChange(this.#currentSortType, true);
         break;
       case UserAction.ADD_POINT:
-        this.#pointPresenters.get(update.id).setSaving();
+        this.#creatingPointPresenters.setSaving();
         this.#pointsModel.addPoint(updateType, update);
-        this.#handleSortTypeChange(this.#currentSortType, true);
         break;
       case UserAction.DELETE_POINT:
         this.#pointPresenters.get(update.id).setDeleting();
         this.#pointsModel.deletePoint(updateType, update);
-        this.#handleSortTypeChange(this.#currentSortType, true);
         break;
     }
   };
@@ -162,6 +164,7 @@ export default class PointsListPresenter {
         this.#renderPointList();
         break;
       case UpdateType.MAJOR:
+        this.#creatingPointPresenters?.destroy();
         this.#clearPointList();
         if (this.points.length) {
           this.#renderPointList();
