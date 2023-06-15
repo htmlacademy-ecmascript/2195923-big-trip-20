@@ -1,8 +1,18 @@
 import Observable from '../framework/observable.js';
-import { getOffers } from '../mock/offer-mock.js';
 
 export default class OffersModel extends Observable {
-  #offers = getOffers();
+  #offersApiService = null;
+  #offers = [];
+
+  constructor({offersApiService}) {
+    super();
+    this.#offersApiService = offersApiService;
+  }
+
+  async init() {
+    this.#offers = await this.#offersApiService.offers;
+    return this.#offers;
+  }
 
   get offers() {
     return this.#offers;
@@ -12,6 +22,9 @@ export default class OffersModel extends Observable {
     let totalPriceOffers = 0;
     const offerIds = new Set(ids);
     const offersByType = this.#offers.find((offer) => offer.type === type);
+    if (offersByType === undefined) {
+      return totalPriceOffers;
+    }
     for (const offer of offersByType.offers) {
       if (offerIds.has(offer.id)) {
         totalPriceOffers += offer.price;

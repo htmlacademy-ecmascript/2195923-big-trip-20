@@ -39,6 +39,10 @@ export default class PointPresenter {
     return this.#destinationsModel.destinations;
   }
 
+  get destinationsName() {
+    return this.#destinationsModel.destinationsName;
+  }
+
   get offers() {
     return this.#offersModel.offers;
   }
@@ -61,6 +65,9 @@ export default class PointPresenter {
   }
 
   #getCheckedOffers(offersForType) {
+    if (offersForType === undefined) {
+      return undefined;
+    }
     const checkedOffers = [];
     this.#point.offers?.forEach((pointOfferId) => {
       checkedOffers.push(offersForType.find((offerElement) => offerElement.id === pointOfferId));
@@ -69,7 +76,7 @@ export default class PointPresenter {
   }
 
   #getOffersForType() {
-    return this.offers.find((offer) => offer.type === this.#point.type).offers;
+    return this.offers.find((offer) => offer.type === this.#point.type)?.offers;
   }
 
   #renderPoint({point, allDestinations, allOffers, mode}) {
@@ -89,6 +96,7 @@ export default class PointPresenter {
       offersForType: this.#offersForType,
       checkedOffers: this.#checkedOffers,
       mode: mode,
+      destinationsName: this.destinationsName,
       onEditFormSubmit: this.#handleEditFormSubmit,
       onEditFormDelete: this.#handleEditFormDelete,
       onEditFormCancel: this.#handleEditFormCancel,

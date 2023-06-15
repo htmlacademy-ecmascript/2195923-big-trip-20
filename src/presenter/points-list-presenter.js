@@ -1,6 +1,8 @@
 import PointsListView from '../view/points-list-view.js';
 import EmptyPointView from '../view/empty-point-view.js';
 import SortView from '../view/sort-view.js';
+import LoadingView from '../view/loading-view.js';
+
 import { render, remove, RenderPosition } from '../framework/render.js';
 import PointPresenter from './point-presenter.js';
 import { sortings, UpdateType, UserAction, Mode, Filter, BLANK_POINT } from '../const.js';
@@ -9,6 +11,7 @@ export default class PointsListPresenter {
   #pointsListComponent = new PointsListView();
   #emptyComponent = null;
   #sortComponent = null;
+  #loadingComponent = null;
   #pointsListContainer = null;
   #pointsModel = null;
   #offersModel = null;
@@ -21,6 +24,8 @@ export default class PointsListPresenter {
 
   #handleNewPoint = null;
 
+  #isLoading = true;
+
   constructor(pointsListContainer, models) {
     this.#pointsListContainer = pointsListContainer;
     this.#pointsModel = models.pointsModel;
@@ -29,6 +34,7 @@ export default class PointsListPresenter {
     this.#filtersModel = models.filtersModel;
     this.#newPointButtonModel = models.newPointButtonModel;
     this.#sortComponent = new SortView({onSortTypeChange: this.#handleSortTypeChange});
+    this.#loadingComponent = new LoadingView();
 
     this.#pointsModel.addObserver(this.#handleModelEvent);
     this.#filtersModel.addObserver(this.#handleFiltersEvent);
@@ -47,6 +53,11 @@ export default class PointsListPresenter {
 
   init({onNewPointSaveOrCancel}) {
     this.#handleNewPoint = onNewPointSaveOrCancel;
+    if (this.#isLoading) {
+      this.#renderLoading();
+      return;
+    }
+
     if (this.points.length) {
       this.#renderSort();
       this.#renderPointList();
@@ -93,7 +104,6 @@ export default class PointsListPresenter {
 
   #renderPointList() {
     render(this.#pointsListComponent, this.#pointsListContainer);
-
     this.points.forEach((point) => {
       this.#renderPoint({point: point, mode: Mode.DEFAULT});
     });
@@ -108,8 +118,13 @@ export default class PointsListPresenter {
     render(this.#sortComponent, this.#pointsListContainer);
   }
 
+  #renderLoading() {
+    render(this.#loadingComponent, this.#pointsListContainer);
+  }
+
   #clearPointList() {
     this.#pointPresenters.forEach((presenter) => presenter.destroy());
+    remove(this.#loadingComponent);
     this.#pointPresenters.clear();
   }
 
@@ -152,6 +167,12 @@ export default class PointsListPresenter {
           render(this.#pointsListComponent, this.#pointsListContainer);
           this.#renderEmptyList(Filter[this.#filtersModel.filters.toUpperCase()].message);
         }
+        break;
+      case UpdateType.INIT:
+        this.#isLoading = false;
+        remove(this.#loadingComponent);
+        this.#renderSort();
+        this.#renderPointList();
         break;
     }
   };

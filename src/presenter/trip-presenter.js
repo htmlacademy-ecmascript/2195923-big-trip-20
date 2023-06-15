@@ -1,4 +1,9 @@
 import { render } from '../framework/render.js';
+import { AUTHORIZATION, END_POINT } from '../const.js';
+
+import PointsApiService from '../api/points-api-service.js';
+import OffersApiService from '../api/offers-api-service.js';
+import DestinationsApiService from '../api/destinations-api-service.js';
 
 import TripView from '../view/trip-view.js';
 
@@ -24,11 +29,15 @@ export default class TripPresenter {
   init() {
     render(this.#tripComponent, this.#tripContainer);
 
-    const pointsModel = new PointsModel();
-    const offersModel = new OffersModel();
-    const destinationsModel = new DestinationsModel();
+    const pointsModel = new PointsModel({pointsApiService: new PointsApiService(END_POINT, AUTHORIZATION)});
+    const offersModel = new OffersModel({offersApiService: new OffersApiService(END_POINT, AUTHORIZATION)});
+    const destinationsModel = new DestinationsModel({destinationsApiService: new DestinationsApiService(END_POINT, AUTHORIZATION)});
     const filtersModel = new FiltersModel();
     const newPointButtonModel = new NewPointButtonModel();
+
+    Promise.all([offersModel.init(), destinationsModel.init(), pointsModel.init()]).then(() => {
+      pointsModel.notify();
+    });
 
     const pointsListPresenter = new PointsListPresenter(
       this.#tripComponent.tripPointsContainer,
