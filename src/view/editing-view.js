@@ -38,12 +38,12 @@ const createDestinationNamesInTemplate = (destinationsName) => {
 const createListOfOffersInTemplate = (offersForType, checkedOffers, isDisabled) => {
   let list = '';
   for (const offer of offersForType) {
-    const lastWordOfTitle = offer.title.split(' ').pop();
+    const lastSectionOfferId = offer.id.split('-').pop();
     const isChecked = checkedOffers?.find((checkedOffer) => checkedOffer.id === offer.id);
     list +=
       `<div class="event__offer-selector">
-        <input class="event__offer-checkbox  visually-hidden" id="event-offer-${lastWordOfTitle}-1" type="checkbox" name="event-offer-${lastWordOfTitle}" ${isChecked ? 'checked' : ''} ${isDisabled ? 'disabled' : ''}>
-        <label class="event__offer-label" for="event-offer-${lastWordOfTitle}-1">
+        <input class="event__offer-checkbox  visually-hidden" id="event-offer-${lastSectionOfferId}-1" type="checkbox" name="event-offer-${lastSectionOfferId}" ${isChecked ? 'checked' : ''} ${isDisabled ? 'disabled' : ''}>
+        <label class="event__offer-label" for="event-offer-${lastSectionOfferId}-1">
           <span class="event__offer-title">${offer.title}</span>
           &plus;&euro;&nbsp;
           <span class="event__offer-price">${offer.price}</span>
@@ -254,7 +254,7 @@ export default class EditingView extends AbstractStatefulView {
   #pointOfferChangeHandler = (evt) => {
     evt.preventDefault();
     const checkedOfferName = evt.target.name.split('-').pop();
-    const checkingOffer = this._state.offersForType.find((offer) => offer.title.split(' ').pop() === checkedOfferName);
+    const checkingOffer = this._state.offersForType.find((offer) => offer.id.split('-').pop() === checkedOfferName);
     if (evt.target.checked) {
       this.updateElement({
         offers: [...this._state.offers, checkingOffer],
