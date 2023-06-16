@@ -156,6 +156,8 @@ export default class PointsListPresenter {
           await this.#pointsModel.updatePoint(updateType, update);
         } catch(err) {
           this.#pointPresenters.get(update.id).setAborting();
+        } finally {
+          this.#uiBlocker.unblock();
         }
         break;
       case UserAction.ADD_POINT:
@@ -164,6 +166,8 @@ export default class PointsListPresenter {
           await this.#pointsModel.addPoint(updateType, update);
         } catch (err) {
           this.#creatingPointPresenters.setAborting();
+        } finally {
+          this.#uiBlocker.unblock();
         }
         break;
       case UserAction.DELETE_POINT:
@@ -172,11 +176,11 @@ export default class PointsListPresenter {
           await this.#pointsModel.deletePoint(updateType, update);
         } catch (err) {
           this.#pointPresenters.get(update.id).setAborting();
+        } finally {
+          this.#uiBlocker.unblock();
         }
         break;
     }
-
-    this.#uiBlocker.unblock();
   };
 
   #handleModelEvent = (updateType, point) => {

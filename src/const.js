@@ -114,7 +114,7 @@ const routePointTypes = [
 
 const AUTHORIZATION = 'Basic dPy4sfS45wcl1sh2I';
 const END_POINT = 'https://20.ecmascript.pages.academy/big-trip';
-const SERVER_UNAVAILABLE_MESSAGE = 'The server is unavailable. Try to reload the page';
+const SERVER_UNAVAILABLE_MESSAGE = 'The server is unavailable. Please try again later';
 
 const TimeLimit = {
   LOWER_LIMIT: 350,
