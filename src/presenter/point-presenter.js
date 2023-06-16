@@ -210,6 +210,14 @@ export default class PointPresenter {
     this.#pointCreateComponent.shake(resetFormState);
   }
 
+  #isRequiredFiledsFill(point) {
+    const isIntegerBasePrice = Number.isInteger(point.basePrice);
+    if (isIntegerBasePrice && point.destination) {
+      return true;
+    }
+    return false;
+  }
+
   #replacePointToEditForm() {
     replace(this.#pointEditComponent, this.#pointComponent);
     this.#handleModeChange();
@@ -248,6 +256,10 @@ export default class PointPresenter {
   };
 
   #handleCreateFormSubmit = (point) => {
+    if (!this.#isRequiredFiledsFill(point)) {
+      return;
+    }
+
     this.#handleDataChange(
       UserAction.ADD_POINT,
       UpdateType.MAJOR,
@@ -263,6 +275,10 @@ export default class PointPresenter {
   };
 
   #handleEditFormSubmit = (point) => {
+    // if (!this.#isRequiredFiledsFill(point)) {
+    //   return;
+    // }
+
     this.#handleDataChange(
       UserAction.UPDATE_POINT,
       UpdateType.MAJOR,

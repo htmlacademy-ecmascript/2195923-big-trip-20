@@ -2,6 +2,7 @@ import PointsListView from '../view/points-list-view.js';
 import EmptyPointView from '../view/empty-point-view.js';
 import SortView from '../view/sort-view.js';
 import LoadingView from '../view/loading-view.js';
+import ErrorView from '../view/error-view.js';
 
 import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
 
@@ -155,6 +156,13 @@ export default class PointsListPresenter {
         try {
           await this.#pointsModel.updatePoint(updateType, update);
         } catch(err) {
+          if (err.message === 'The server is unavailable') {
+            const errorComponent = new ErrorView(SERVER_UNAVAILABLE_MESSAGE);
+            render(errorComponent, document.body);
+          } else {
+            const errorComponent = new ErrorView(err.message);
+            render(errorComponent, document.body);
+          }
           this.#pointPresenters.get(update.id).setAborting();
         } finally {
           this.#uiBlocker.unblock();
@@ -165,6 +173,13 @@ export default class PointsListPresenter {
         try {
           await this.#pointsModel.addPoint(updateType, update);
         } catch (err) {
+          if (err.message === 'The server is unavailable') {
+            const errorComponent = new ErrorView(SERVER_UNAVAILABLE_MESSAGE);
+            render(errorComponent, document.body);
+          } else {
+            const errorComponent = new ErrorView(err.message);
+            render(errorComponent, document.body);
+          }
           this.#creatingPointPresenters.setAborting();
         } finally {
           this.#uiBlocker.unblock();
@@ -175,6 +190,10 @@ export default class PointsListPresenter {
         try {
           await this.#pointsModel.deletePoint(updateType, update);
         } catch (err) {
+          if (err.message === 'The server is unavailable') {
+            const errorComponent = new ErrorView(SERVER_UNAVAILABLE_MESSAGE);
+            render(errorComponent, document.body);
+          }
           this.#pointPresenters.get(update.id).setAborting();
         } finally {
           this.#uiBlocker.unblock();

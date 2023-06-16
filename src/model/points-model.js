@@ -60,8 +60,12 @@ export default class PointsModel extends Observable {
         ...this.#points.slice(index + 1),
       ];
       this._notify(updateType, updatedPoint);
+
     } catch(err) {
-      throw new Error('Can\'t update point');
+      if (err.message === 'Failed to fetch') {
+        throw new Error('The server is unavailable');
+      }
+      throw new Error('All form fields must be completed');
     }
   }
 
