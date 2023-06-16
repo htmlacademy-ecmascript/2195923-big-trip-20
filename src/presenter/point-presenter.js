@@ -179,6 +179,37 @@ export default class PointPresenter {
     }
   }
 
+  setAborting() {
+    if (this.#mode === Mode.DEFAULT) {
+      this.#pointComponent.shake();
+      return;
+    }
+
+    const resetFormState = () => {
+      if (this.#mode === Mode.EDIT) {
+        this.#pointEditComponent.updateElement({
+          isDisabled: false,
+          isSaving: false,
+          isDeleting: false,
+        });
+        return;
+      }
+
+      this.#pointCreateComponent.updateElement({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false,
+      });
+    };
+
+    if (this.#mode === Mode.EDIT) {
+      this.#pointEditComponent.shake(resetFormState);
+      return;
+    }
+
+    this.#pointCreateComponent.shake(resetFormState);
+  }
+
   #replacePointToEditForm() {
     replace(this.#pointEditComponent, this.#pointComponent);
     this.#handleModeChange();
@@ -236,7 +267,6 @@ export default class PointPresenter {
       UserAction.UPDATE_POINT,
       UpdateType.MAJOR,
       point);
-    // this.#replaceEditFormToPoint();
     document.removeEventListener('keydown', this.#escKeyDownHandler);
   };
 
@@ -248,10 +278,6 @@ export default class PointPresenter {
   };
 
   #handleEditFormCancel = () => {
-    this.#handleDataChange(
-      UserAction.UPDATE_POINT,
-      UpdateType.MINOR,
-      this.#point);
     this.#pointEditComponent.reset(this.#point, this.#offersForType, this.#checkedOffers, this.#destination);
     this.#replaceEditFormToPoint();
     document.removeEventListener('keydown', this.#escKeyDownHandler);
