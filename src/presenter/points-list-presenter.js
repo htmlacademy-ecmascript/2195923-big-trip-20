@@ -141,6 +141,7 @@ export default class PointsListPresenter {
 
   #handleModeChange = () => {
     this.#pointPresenters.forEach((presenter) => presenter.resetView());
+    this.#creatingPointPresenters?.destroy();
   };
 
   #handleViewAction = async (actionType, updateType, update) => {
