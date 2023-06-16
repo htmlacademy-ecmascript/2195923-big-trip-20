@@ -3,9 +3,11 @@ import EmptyPointView from '../view/empty-point-view.js';
 import SortView from '../view/sort-view.js';
 import LoadingView from '../view/loading-view.js';
 
+import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
+
 import { render, remove, RenderPosition } from '../framework/render.js';
 import PointPresenter from './point-presenter.js';
-import { sortings, UpdateType, UserAction, Mode, Filter, BLANK_POINT } from '../const.js';
+import { sortings, UpdateType, UserAction, Mode, Filter, BLANK_POINT, TimeLimit } from '../const.js';
 
 export default class PointsListPresenter {
   #pointsListComponent = new PointsListView();
@@ -26,6 +28,10 @@ export default class PointsListPresenter {
   #handleNewPoint = null;
 
   #isLoading = true;
+  #uiBlocker = new UiBlocker({
+    lowerLimit: TimeLimit.LOWER_LIMIT,
+    upperLimit: TimeLimit.UPPER_LIMIT
+  });
 
   constructor(pointsListContainer, models) {
     this.#pointsListContainer = pointsListContainer;
@@ -138,6 +144,8 @@ export default class PointsListPresenter {
   };
 
   #handleViewAction = async (actionType, updateType, update) => {
+    this.#uiBlocker.block();
+
     switch (actionType) {
       case UserAction.UPDATE_POINT:
         this.#pointPresenters.get(update.id).setSaving();
@@ -164,6 +172,8 @@ export default class PointsListPresenter {
         }
         break;
     }
+
+    this.#uiBlocker.unblock();
   };
 
   #handleModelEvent = (updateType, point) => {
