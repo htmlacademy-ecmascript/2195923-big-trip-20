@@ -32,7 +32,7 @@ const Filter = {
   PRESENT: {
     type: 'present',
     message: 'There are no present events now',
-    func: (point) => (Date.parse(point.dateFrom) < Date.now() && Date.parse(point.dateTo) > Date.now()),
+    func: (point) => (Date.parse(point.dateFrom) <= Date.now() && Date.parse(point.dateTo) >= Date.now()),
   },
   FUTURE: {
     type: 'future',
@@ -86,7 +86,8 @@ const UpdateType = {
   PATCH: 'PATCH',
   MINOR: 'MINOR',
   MAJOR: 'MAJOR',
-  INIT: 'INIT',
+  INIT_SUCCESS: 'INIT_SUCCESS',
+  INIT_FAIL: 'INIT_FAIL',
 };
 
 const BLANK_POINT = {
@@ -113,10 +114,11 @@ const routePointTypes = [
 
 const AUTHORIZATION = 'Basic dPy4sfS45wcl1sh2I';
 const END_POINT = 'https://20.ecmascript.pages.academy/big-trip';
+const SERVER_UNAVAILABLE_MESSAGE = 'The server is unavailable. Try to reload the page';
 
 const TimeLimit = {
   LOWER_LIMIT: 350,
   UPPER_LIMIT: 1000
 };
 
-export { Time, DateFormat, Filter, Mode, sortings, routePointTypes, UserAction, UpdateType, BLANK_POINT, AUTHORIZATION, END_POINT, TimeLimit };
+export { Time, DateFormat, Filter, Mode, sortings, routePointTypes, UserAction, UpdateType, BLANK_POINT, AUTHORIZATION, END_POINT, TimeLimit, SERVER_UNAVAILABLE_MESSAGE };

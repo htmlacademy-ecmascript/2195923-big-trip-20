@@ -20,6 +20,7 @@ import NewPointButtonModel from '../model/new-point-button-model.js';
 export default class TripPresenter {
   #tripContainer = null;
   #tripComponent = null;
+  #emptyComponent = null;
 
   constructor({tripContainer}) {
     this.#tripContainer = tripContainer;
@@ -36,7 +37,9 @@ export default class TripPresenter {
     const newPointButtonModel = new NewPointButtonModel();
 
     Promise.all([offersModel.init(), destinationsModel.init(), pointsModel.init()]).then(() => {
-      pointsModel.notify();
+      pointsModel.notifySuccessLoad();
+    }, () => {
+      pointsModel.notifyFailLoad();
     });
 
     const pointsListPresenter = new PointsListPresenter(
@@ -60,8 +63,6 @@ export default class TripPresenter {
       },
       onPointCreate);
 
-    const onNewPointSaveOrCancel = tripInfoPresenter.enableNewPoint;
-
     const filterPresenter = new FilterPresenter(
       this.#tripComponent.tripFiltersContainer, {
         filtersModel: filtersModel,
@@ -69,8 +70,14 @@ export default class TripPresenter {
       }
     );
 
+    const onNewPointSaveOrCancel = tripInfoPresenter.enableNewPointButton;
+    const onLoadDataFail = {
+      disableNewPointButton: tripInfoPresenter.disableNewPointButton,
+      disableFilters: filterPresenter.disableFilters
+    };
+
+    pointsListPresenter.init({onNewPointSaveOrCancel, onLoadDataFail});
     tripInfoPresenter.init();
-    pointsListPresenter.init({onNewPointSaveOrCancel});
     filterPresenter.init();
   }
 }

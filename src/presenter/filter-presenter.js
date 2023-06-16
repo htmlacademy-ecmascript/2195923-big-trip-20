@@ -29,4 +29,8 @@ export default class FilterPresenter {
     render(this.#filterComponent, this.#filterContainer);
     this.#filterComponent.setHandlers();
   };
+
+  disableFilters = () => {
+    this.#filterComponent.updateElement({isDisabled: true});
+  };
 }

@@ -16,8 +16,12 @@ export default class PointsModel extends Observable {
     return this.#points;
   }
 
-  notify() {
-    this._notify(UpdateType.INIT);
+  notifySuccessLoad() {
+    this._notify(UpdateType.INIT_SUCCESS);
+  }
+
+  notifyFailLoad() {
+    this._notify(UpdateType.INIT_FAIL);
   }
 
   get points() {

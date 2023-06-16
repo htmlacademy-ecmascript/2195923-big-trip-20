@@ -65,8 +65,12 @@ export default class TripInfoPresenter {
     }
   }
 
-  enableNewPoint = () => {
+  enableNewPointButton = () => {
     this.#newPointButtonComponent.removeDisabledAttribute();
+  };
+
+  disableNewPointButton = () => {
+    this.#newPointButtonComponent.setDisableAttribute();
   };
 
   #clearTripInfo() {
@@ -106,7 +110,7 @@ export default class TripInfoPresenter {
         this.#clearTripInfo();
         this.init();
         break;
-      case UpdateType.INIT:
+      case UpdateType.INIT_SUCCESS:
         this.#clearTripInfo();
         this.init();
         break;

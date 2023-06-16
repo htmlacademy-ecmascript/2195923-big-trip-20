@@ -7,7 +7,7 @@ import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
 
 import { render, remove, RenderPosition } from '../framework/render.js';
 import PointPresenter from './point-presenter.js';
-import { sortings, UpdateType, UserAction, Mode, Filter, BLANK_POINT, TimeLimit } from '../const.js';
+import { sortings, UpdateType, UserAction, Mode, Filter, BLANK_POINT, TimeLimit, SERVER_UNAVAILABLE_MESSAGE } from '../const.js';
 
 export default class PointsListPresenter {
   #pointsListComponent = new PointsListView();
@@ -26,6 +26,7 @@ export default class PointsListPresenter {
   #currentSortType = sortings[0].name;
 
   #handleNewPoint = null;
+  #handleLoadDataFail = null;
 
   #isLoading = true;
   #uiBlocker = new UiBlocker({
@@ -58,8 +59,9 @@ export default class PointsListPresenter {
     return this.#pointsListComponent;
   }
 
-  init({onNewPointSaveOrCancel}) {
+  init({onNewPointSaveOrCancel, onLoadDataFail}) {
     this.#handleNewPoint = onNewPointSaveOrCancel;
+    this.#handleLoadDataFail = onLoadDataFail;
     if (this.#isLoading) {
       this.#renderLoading();
       return;
@@ -197,12 +199,18 @@ export default class PointsListPresenter {
           this.#renderEmptyList(Filter[this.#filtersModel.filters.toUpperCase()].message);
         }
         break;
-      case UpdateType.INIT:
+      case UpdateType.INIT_SUCCESS:
         this.#isLoading = false;
         remove(this.#loadingComponent);
         this.#renderSort();
         this.#renderPointList();
         break;
+      case UpdateType.INIT_FAIL:
+        this.#isLoading = false;
+        remove(this.#loadingComponent);
+        this.#renderEmptyList(SERVER_UNAVAILABLE_MESSAGE);
+        this.#handleLoadDataFail.disableNewPointButton();
+        this.#handleLoadDataFail.disableFilters();
     }
   };
 
@@ -216,9 +224,10 @@ export default class PointsListPresenter {
         this.#clearPointList();
         if (this.points.length) {
           remove(this.#emptyComponent);
+          remove(this.#sortComponent);
           render(this.#sortComponent, this.#pointsListContainer);
           this.#sortComponent.setHandlers();
-          this.#renderPointList();
+          this.#handleSortTypeChange('day', true);
         } else {
           remove(this.#sortComponent);
           remove(this.#emptyComponent);
