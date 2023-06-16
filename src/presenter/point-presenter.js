@@ -1,5 +1,6 @@
 import PointView from '../view/point-view.js';
-import CreationOrEditingView from '../view/creation-or-editing-view.js';
+import EditingView from '../view/editing-view.js';
+import CreatingView from '../view/creating-view.js';
 import { render, replace, remove, RenderPosition } from '../framework/render.js';
 import { Mode, UserAction, UpdateType } from '../const.js';
 
@@ -17,6 +18,7 @@ export default class PointPresenter {
   #pointContainer = null;
   #pointComponent = null;
   #pointEditComponent = null;
+  #pointCreateComponent = null;
 
   #prevPointComponent = null;
   #prevEditComponent = null;
@@ -53,15 +55,20 @@ export default class PointPresenter {
     this.#offersForType = this.#getOffersForType();
     this.#checkedOffers = this.#getCheckedOffers(this.#offersForType);
     this.#destination = this.destinations.find((destinationElement) => destinationElement.id === this.#point.destination);
+
+
+    if (mode !== Mode.CREATE) {
+      this.#renderPoint({
+        point: this.#point,
+        allDestinations: this.destinations,
+        allOffers: this.offers
+      });
+    } else {
+      this.#renderFormCreatePoint();
+    }
+
     this.#prevPointComponent = this.#pointComponent;
     this.#prevEditComponent = this.#pointEditComponent;
-
-    this.#renderPoint({
-      point: this.#point,
-      allDestinations: this.destinations,
-      allOffers: this.offers,
-      mode: this.#mode,
-    });
   }
 
   #getCheckedOffers(offersForType) {
@@ -79,7 +86,23 @@ export default class PointPresenter {
     return this.offers.find((offer) => offer.type === this.#point.type)?.offers;
   }
 
-  #renderPoint({point, allDestinations, allOffers, mode}) {
+  #renderFormCreatePoint() {
+    this.#pointCreateComponent = new CreatingView({
+      allDestinations: this.destinations,
+      destination: this.#destination,
+      allOffers: this.offers,
+      offersForType: this.#offersForType,
+      checkedOffers: this.#checkedOffers,
+      destinationsName: this.destinationsName,
+      onCreateFormSubmit: this.#handleCreateFormSubmit,
+      onCreateFormCancel: this.#handleCreateFormCancel,
+    });
+
+    render(this.#pointCreateComponent, this.#pointContainer.element, RenderPosition.AFTERBEGIN);
+    document.addEventListener('keydown', this.#escKeyDownHandler);
+  }
+
+  #renderPoint({point, allDestinations, allOffers}) {
     this.#pointComponent = new PointView({
       point: point,
       destination: this.#destination,
@@ -88,31 +111,22 @@ export default class PointPresenter {
       onFavoriteClick: this.#handleFavoriteClick
     });
 
-    this.#pointEditComponent = new CreationOrEditingView({
+    this.#pointEditComponent = new EditingView({
       point,
       allDestinations,
       destination: this.#destination,
       allOffers,
       offersForType: this.#offersForType,
       checkedOffers: this.#checkedOffers,
-      mode: mode,
       destinationsName: this.destinationsName,
       onEditFormSubmit: this.#handleEditFormSubmit,
       onEditFormDelete: this.#handleEditFormDelete,
       onEditFormCancel: this.#handleEditFormCancel,
-      onCreateFormSubmit: this.#handleCreateFormSubmit,
-      onCreateFormCancel: this.#handleCreateFormCancel,
     });
 
     if (this.#prevPointComponent === null || this.#prevEditComponent === null) {
-      if (mode === Mode.CREATE) {
-        render(this.#pointEditComponent, this.#pointContainer.element, RenderPosition.AFTERBEGIN);
-        document.addEventListener('keydown', this.#escKeyDownHandler);
-        return;
-      } else {
-        render(this.#pointComponent, this.#pointContainer.element);
-        return;
-      }
+      render(this.#pointComponent, this.#pointContainer.element);
+      return;
     }
 
     if (this.#mode === Mode.DEFAULT) {
@@ -130,6 +144,7 @@ export default class PointPresenter {
   destroy() {
     remove(this.#pointComponent);
     remove(this.#pointEditComponent);
+    remove(this.#pointCreateComponent);
   }
 
   resetView() {
@@ -139,6 +154,60 @@ export default class PointPresenter {
     } else if (this.#mode === Mode.CREATE) {
       this.destroy();
     }
+  }
+
+  setSaving() {
+    if (this.#mode === Mode.EDIT) {
+      this.#pointEditComponent.updateElement({
+        isDisabled: true,
+        isSaving: true,
+      });
+    } else if (this.#mode === Mode.CREATE) {
+      this.#pointCreateComponent.updateElement({
+        isDisabled: true,
+        isSaving: true,
+      });
+    }
+  }
+
+  setDeleting() {
+    if (this.#mode === Mode.EDIT || this.#mode === Mode.CREATE) {
+      this.#pointEditComponent.updateElement({
+        isDisabled: true,
+        isDeleting: true,
+      });
+    }
+  }
+
+  setAborting() {
+    if (this.#mode === Mode.DEFAULT) {
+      this.#pointComponent.shake();
+      return;
+    }
+
+    const resetFormState = () => {
+      if (this.#mode === Mode.EDIT) {
+        this.#pointEditComponent.updateElement({
+          isDisabled: false,
+          isSaving: false,
+          isDeleting: false,
+        });
+        return;
+      }
+
+      this.#pointCreateComponent.updateElement({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false,
+      });
+    };
+
+    if (this.#mode === Mode.EDIT) {
+      this.#pointEditComponent.shake(resetFormState);
+      return;
+    }
+
+    this.#pointCreateComponent.shake(resetFormState);
   }
 
   #replacePointToEditForm() {
@@ -183,7 +252,6 @@ export default class PointPresenter {
       UserAction.ADD_POINT,
       UpdateType.MAJOR,
       point);
-    this.#replaceEditFormToPoint();
     this.#handleNewPointCreateOrCancel();
     document.removeEventListener('keydown', this.#escKeyDownHandler);
   };
@@ -199,7 +267,6 @@ export default class PointPresenter {
       UserAction.UPDATE_POINT,
       UpdateType.MAJOR,
       point);
-    this.#replaceEditFormToPoint();
     document.removeEventListener('keydown', this.#escKeyDownHandler);
   };
 
@@ -211,10 +278,6 @@ export default class PointPresenter {
   };
 
   #handleEditFormCancel = () => {
-    this.#handleDataChange(
-      UserAction.UPDATE_POINT,
-      UpdateType.MINOR,
-      this.#point);
     this.#pointEditComponent.reset(this.#point, this.#offersForType, this.#checkedOffers, this.#destination);
     this.#replaceEditFormToPoint();
     document.removeEventListener('keydown', this.#escKeyDownHandler);
