@@ -1,9 +1,10 @@
 import Observable from '../framework/observable.js';
-import { UpdateType } from '../const.js';
+import { UpdateType, sortings } from '../const.js';
 
 export default class PointsModel extends Observable {
   #pointsApiService = null;
   #points = [];
+  #sortingPoints = [];
 
   constructor({pointsApiService}) {
     super();
@@ -13,6 +14,7 @@ export default class PointsModel extends Observable {
   async init() {
     const points = await this.#pointsApiService.points;
     this.#points = points.map(this.#pointsApiService.adaptToClient);
+    this.#sortPoints();
     return this.#points;
   }
 
@@ -28,12 +30,18 @@ export default class PointsModel extends Observable {
     return this.#points;
   }
 
+  #sortPoints() {
+    this.#sortingPoints = this.#points;
+    const sortFunction = sortings.find((sortElement) => sortElement.name === 'day').func;
+    return this.#sortingPoints.sort(sortFunction);
+  }
+
   get tripStartDate() {
-    return this.#points[0].dateFrom;
+    return this.#sortingPoints[0].dateFrom;
   }
 
   get tripEndDate() {
-    return this.#points[this.#points.length - 1].dateTo;
+    return this.#sortingPoints[this.#sortingPoints.length - 1].dateTo;
   }
 
   get totalPrice() {
