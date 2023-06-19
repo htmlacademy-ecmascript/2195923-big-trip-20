@@ -1,7 +1,6 @@
 import PointView from '../view/point-view.js';
 import EditingView from '../view/editing-view.js';
 import CreatingView from '../view/creating-view.js';
-import ErrorView from '../view/error-view.js';
 import {render, replace, remove, RenderPosition} from '../framework/render.js';
 import {Mode, UserAction, UpdateType} from '../const.js';
 
