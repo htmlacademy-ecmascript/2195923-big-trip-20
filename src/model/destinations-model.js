@@ -9,17 +9,17 @@ export default class DestinationsModel extends Observable {
     this.#destinationsApiService = destinationsApiService;
   }
 
-  async init() {
-    this.#destinations = await this.#destinationsApiService.destinations;
-    return this.#destinations;
-  }
-
   get destinations() {
     return this.#destinations;
   }
 
   get destinationsName() {
     return this.#destinations.map((destination) => destination.name);
+  }
+
+  async init() {
+    this.#destinations = await this.#destinationsApiService.destinations;
+    return this.#destinations;
   }
 
   getRouteOfTrip(destinationIds) {

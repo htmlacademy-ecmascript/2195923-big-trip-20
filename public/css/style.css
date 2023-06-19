@@ -831,3 +831,21 @@ main {
     padding-right: 20px; }
   .event__photo:not(:last-child) {
     margin-right: 5px; }
+
+.error__msg {
+  display: block;
+  position: fixed;
+  width: 100%;
+  height: 120px;
+  top: 0;
+  left: 0;
+  margin: auto;
+  z-index: 10;
+  border-color: #000000;
+  background-color: #ccc4c4;
+
+  font-weight: 500;
+  font-size: 44px;
+  line-height: 60px;
+  text-align: center;
+}

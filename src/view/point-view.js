@@ -1,6 +1,7 @@
-import { formatDate, formatDuration } from '../utils.js';
-import { DateFormat } from '../const.js';
 import AbstractView from '../framework/view/abstract-view.js';
+import {formatDate, formatDuration} from '../utils.js';
+import {DateFormat} from '../const.js';
+import {RenderPosition} from '../framework/render.js';
 
 const createListOffersInTemplate = (checkedOffers) => {
   if (checkedOffers === undefined) {
@@ -16,7 +17,7 @@ const createListOffersInTemplate = (checkedOffers) => {
         <span class="event__offer-price">${checkedOffers[i].price}</span>
       </li>`;
 
-    eventList.insertAdjacentHTML('beforeend', eventOffer);
+    eventList.insertAdjacentHTML(RenderPosition.BEFOREEND, eventOffer);
   }
   return eventList.outerHTML;
 };

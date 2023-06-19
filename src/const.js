@@ -1,5 +1,9 @@
 import dayjs from 'dayjs';
 
+const AUTHORIZATION = 'Basic dPy4sfS45wcl1sh2I';
+const END_POINT = 'https://20.ecmascript.pages.academy/big-trip';
+const SERVER_UNAVAILABLE_MESSAGE = 'The server is unavailable. Please try again later';
+
 const Time = {
   HOURS_PER_DAY: 24,
   MINUTES_PER_HOUR: 60,
@@ -22,23 +26,23 @@ const Filter = {
   EVERYTHING: {
     type: 'everything',
     message: 'Click New Event to create your first point',
-    func: () => true,
+    filter: () => true,
   },
   PAST: {
     type: 'past',
     message: 'There are no past events now',
-    func: (point) => Date.parse(point.dateTo) < Date.now(),
+    filter: (point) => Date.parse(point.dateTo) < Date.now(),
   },
   PRESENT: {
     type: 'present',
     message: 'There are no present events now',
-    func: (point) => (Date.parse(point.dateFrom) < Date.now() && Date.parse(point.dateTo) > Date.now()),
+    filter: (point) => (Date.parse(point.dateFrom) <= Date.now() && Date.parse(point.dateTo) >= Date.now()),
   },
   FUTURE: {
     type: 'future',
     message: 'There are no future events now',
-    func: (point) => Date.parse(point.dateFrom) > Date.now(),
-  }
+    filter: (point) => Date.parse(point.dateFrom) > Date.now(),
+  },
 };
 
 const Mode = {
@@ -47,34 +51,33 @@ const Mode = {
   CREATE: 'Create',
 };
 
-
-const sortings = [
-  {
+const Sorting = {
+  DAY: {
     name: 'day',
     attribute: 'checked',
-    func: (point1, point2) => dayjs(point1.dateFrom) - dayjs(point2.dateFrom),
+    sort: (firstPoint, secondPoint) => dayjs(firstPoint.dateFrom) - dayjs(secondPoint.dateFrom),
   },
-  {
+  EVENT: {
     name: 'event',
     attribute: 'disabled',
-    func: () => {},
+    sort: () => {},
   },
-  {
+  TIME: {
     name: 'time',
     attribute: '',
-    func: (point1, point2) => (dayjs(point2.dateTo) - dayjs(point2.dateFrom)) - (dayjs(point1.dateTo) - dayjs(point1.dateFrom)),
+    sort: (firstPoint, secondPoint) => (dayjs(secondPoint.dateTo) - dayjs(secondPoint.dateFrom)) - (dayjs(firstPoint.dateTo) - dayjs(firstPoint.dateFrom)),
   },
-  {
+  PRICE: {
     name: 'price',
     attribute: '',
-    func: (point1, point2) => point2.basePrice - point1.basePrice,
+    sort: (firstPoint, secondPoint) => secondPoint.basePrice - firstPoint.basePrice,
   },
-  {
+  OFFER: {
     name: 'offers',
     attribute: 'disabled',
-    func: () => {},
-  }
-];
+    sort: () => {},
+  },
+};
 
 const UserAction = {
   UPDATE_POINT: 'UPDATE_POINT',
@@ -86,7 +89,20 @@ const UpdateType = {
   PATCH: 'PATCH',
   MINOR: 'MINOR',
   MAJOR: 'MAJOR',
-  INIT: 'INIT',
+  INIT_SUCCESS: 'INIT_SUCCESS',
+  INIT_FAIL: 'INIT_FAIL',
+};
+
+const RoutePointType = {
+  TAXI: 'taxi',
+  BUS: 'bus',
+  TRAIN: 'train',
+  SHIP: 'ship',
+  DRIVE: 'drive',
+  FLIGHT: 'flight',
+  CHECK_IN: 'check-in',
+  SIGHTSEEING: 'sightseeing',
+  RESTAURANT: 'restaurant',
 };
 
 const BLANK_POINT = {
@@ -96,27 +112,34 @@ const BLANK_POINT = {
   destination: '',
   isFavorite: false,
   offers: [],
-  type: 'taxi',
+  type: RoutePointType.TAXI,
 };
-
-const routePointTypes = [
-  'taxi',
-  'bus',
-  'train',
-  'ship',
-  'drive',
-  'flight',
-  'check-in',
-  'sightseeing',
-  'restaurant',
-];
-
-const AUTHORIZATION = 'Basic dPy4sfS45wcl1sh2I';
-const END_POINT = 'https://20.ecmascript.pages.academy/big-trip';
 
 const TimeLimit = {
   LOWER_LIMIT: 350,
   UPPER_LIMIT: 1000
 };
 
-export { Time, DateFormat, Filter, Mode, sortings, routePointTypes, UserAction, UpdateType, BLANK_POINT, AUTHORIZATION, END_POINT, TimeLimit };
+const Method = {
+  GET: 'GET',
+  PUT: 'PUT',
+  POST: 'POST',
+  DELETE: 'DELETE'
+};
+
+export {
+  Time,
+  DateFormat,
+  Filter,
+  Mode,
+  Sorting,
+  RoutePointType,
+  UserAction,
+  UpdateType,
+  BLANK_POINT,
+  AUTHORIZATION,
+  END_POINT,
+  TimeLimit,
+  SERVER_UNAVAILABLE_MESSAGE,
+  Method,
+};

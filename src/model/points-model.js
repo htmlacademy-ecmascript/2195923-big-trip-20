@@ -1,23 +1,14 @@
 import Observable from '../framework/observable.js';
-import { UpdateType } from '../const.js';
+import {UpdateType, Sorting} from '../const.js';
 
 export default class PointsModel extends Observable {
   #pointsApiService = null;
   #points = [];
+  #sortingPoints = [];
 
   constructor({pointsApiService}) {
     super();
     this.#pointsApiService = pointsApiService;
-  }
-
-  async init() {
-    const points = await this.#pointsApiService.points;
-    this.#points = points.map(this.#pointsApiService.adaptToClient);
-    return this.#points;
-  }
-
-  notify() {
-    this._notify(UpdateType.INIT);
   }
 
   get points() {
@@ -25,11 +16,11 @@ export default class PointsModel extends Observable {
   }
 
   get tripStartDate() {
-    return this.#points[0].dateFrom;
+    return this.#sortingPoints[0].dateFrom;
   }
 
   get tripEndDate() {
-    return this.#points[this.#points.length - 1].dateTo;
+    return this.#sortingPoints[this.#sortingPoints.length - 1].dateTo;
   }
 
   get totalPrice() {
@@ -37,7 +28,22 @@ export default class PointsModel extends Observable {
   }
 
   get destinationIds() {
-    return this.#points.map((point) => point.destination);
+    return this.#sortingPoints.map((point) => point.destination);
+  }
+
+  async init() {
+    const points = await this.#pointsApiService.points;
+    this.#points = points.map(this.#pointsApiService.adaptToClient);
+    this.#sortPoints();
+    return this.#points;
+  }
+
+  notifySuccessLoad() {
+    this._notify(UpdateType.INIT_SUCCESS);
+  }
+
+  notifyFailLoad() {
+    this._notify(UpdateType.INIT_FAIL);
   }
 
   async updatePoint(updateType, update) {
@@ -55,9 +61,14 @@ export default class PointsModel extends Observable {
         update,
         ...this.#points.slice(index + 1),
       ];
+      this.#sortPoints();
       this._notify(updateType, updatedPoint);
+
     } catch(err) {
-      throw new Error('Can\'t update point');
+      if (err.message === 'Failed to fetch') {
+        throw new Error('The server is unavailable');
+      }
+      throw new Error('All form fields must be completed');
     }
   }
 
@@ -69,6 +80,7 @@ export default class PointsModel extends Observable {
         newPoint,
         ...this.#points,
       ];
+      this.#sortPoints();
       this._notify(updateType, update);
     } catch (err) {
       throw new Error('Can\'t add point');
@@ -88,9 +100,15 @@ export default class PointsModel extends Observable {
         ...this.#points.slice(0, index),
         ...this.#points.slice(index + 1),
       ];
+      this.#sortPoints();
       this._notify(updateType);
     } catch(err) {
       throw new Error('Can\'t delete point');
     }
+  }
+
+  #sortPoints() {
+    this.#sortingPoints = this.points;
+    this.#sortingPoints.sort(Object.values(Sorting).find((sortElement) => sortElement.name === Sorting.DAY.name).sort);
   }
 }

@@ -1,6 +1,6 @@
 import AbstractView from '../framework/view/abstract-view.js';
 
-function createNoTaskTemplate() {
+function createLoadingTemplate() {
   return (
     '<p class="trip-events__msg">Loading...</p>'
   );
@@ -8,6 +8,6 @@ function createNoTaskTemplate() {
 
 export default class LoadingView extends AbstractView {
   get template() {
-    return createNoTaskTemplate();
+    return createLoadingTemplate();
   }
 }

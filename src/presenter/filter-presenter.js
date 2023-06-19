@@ -1,5 +1,6 @@
 import FilterView from '../view/filter-view.js';
 import { render, remove } from '../framework/render.js';
+import { UpdateType } from '../const.js';
 
 export default class FilterPresenter {
   #filterComponent = null;
@@ -12,21 +13,25 @@ export default class FilterPresenter {
     this.#filtersModel = models.filtersModel;
     this.#newPointButtonModel = models.newPointButtonModel;
 
-    this.#newPointButtonModel.addObserver(this.#handleNewPointButtonClick);
+    this.#newPointButtonModel.addObserver(this.#newPointButtonStateChangeHandler);
   }
 
   init() {
-    this.#filterComponent = new FilterView({onFilterTypeChange: this.#handleFilterTypeChange});
+    this.#filterComponent = new FilterView({onFilterTypeChange: this.#filterTypeChangeHandler});
     render(this.#filterComponent, this.#filterContainer);
   }
 
-  #handleFilterTypeChange = (filterType) => {
-    this.#filtersModel.setFilters('MAJOR', filterType);
+  #filterTypeChangeHandler = (filterType) => {
+    this.#filtersModel.setFilter(UpdateType.MAJOR, filterType);
   };
 
-  #handleNewPointButtonClick = () => {
+  #newPointButtonStateChangeHandler = () => {
     remove(this.#filterComponent);
     render(this.#filterComponent, this.#filterContainer);
-    this.#filterComponent.setHandlers();
+    this.#filterComponent.init();
+  };
+
+  disableFilters = () => {
+    this.#filterComponent.updateElement({isDisabled: true});
   };
 }

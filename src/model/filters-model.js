@@ -1,16 +1,15 @@
 import Observable from '../framework/observable.js';
-import { Filter } from '../const.js';
-
+import {Filter} from '../const.js';
 
 export default class FiltersModel extends Observable {
-  #filters = Filter.EVERYTHING.type;
+  #filter = Filter.EVERYTHING.type;
 
-  get filters() {
-    return this.#filters;
+  get filter() {
+    return this.#filter;
   }
 
-  setFilters = (typeEvent, currentFilter) => {
-    this.#filters = currentFilter;
-    this._notify(typeEvent, this.#filters);
-  };
+  setFilter(typeEvent, currentFilter) {
+    this.#filter = currentFilter;
+    this._notify(typeEvent, this.#filter);
+  }
 }
