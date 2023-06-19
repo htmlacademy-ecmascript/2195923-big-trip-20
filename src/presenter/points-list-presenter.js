@@ -65,12 +65,11 @@ export default class PointsListPresenter {
       this.#renderLoading();
       return;
     }
-
     if (this.points.length) {
       this.#renderSort();
       this.#renderPointList();
     } else {
-      this.#renderEmptyList();
+      this.#renderEmptyList(Filter.EVERYTHING.message);
     }
   }
 
@@ -157,7 +156,7 @@ export default class PointsListPresenter {
       render(this.#sortComponent, this.#pointsListContainer);
       render(this.#pointsListComponent, this.#pointsListContainer);
     }
-    this.#filtersModel.setFilter('PATCH', Filter.EVERYTHING.type);
+    this.#filtersModel.setFilter(UpdateType.PATCH, Filter.EVERYTHING.type);
     this.#sortTypeChangeHandler(Sorting.DAY.name, true);
 
     this.#modeChangeHandler();
@@ -239,6 +238,7 @@ export default class PointsListPresenter {
         this.#creatingPointPresenters?.destroy();
         this.#clearPointList();
         if (this.points.length) {
+          remove(this.#emptyComponent);
           this.#renderPointList();
         } else {
           remove(this.#sortComponent);
@@ -251,6 +251,9 @@ export default class PointsListPresenter {
         remove(this.#loadingComponent);
         this.#renderSort();
         this.#renderPointList();
+        if (!this.points.length) {
+          this.#renderEmptyList(Filter.EVERYTHING.message);
+        }
         break;
       case UpdateType.INIT_FAIL:
         this.#isLoading = false;

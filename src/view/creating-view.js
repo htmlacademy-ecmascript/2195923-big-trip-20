@@ -41,7 +41,7 @@ function createDestinationNamesInTemplate(destinationsName) {
 function createListOfOffersInTemplate(offersForType, checkedOffers, isDisabled) {
   let list = '';
   for (const offer of offersForType) {
-    const lastWordOfTitle = offer.title.split(' ').pop();
+    const lastWordOfTitle = offer.id.split(' ').pop();
     const isChecked = checkedOffers?.find((checkedOffer) => checkedOffer.id === offer.id);
     list +=
       `<div class="event__offer-selector">
@@ -276,7 +276,7 @@ export default class CreatingView extends AbstractStatefulView {
   #pointOfferChangeHandler = (evt) => {
     evt.preventDefault();
     const checkedOfferName = evt.target.name.split('-').pop();
-    const checkingOffer = this._state.offersForType.find((offer) => offer.title.split(' ').pop() === checkedOfferName);
+    const checkingOffer = this._state.offersForType.find((offer) => offer.id.split('-').pop() === checkedOfferName);
     if (evt.target.checked) {
       this.updateElement({
         offers: [...this._state.offers, checkingOffer],

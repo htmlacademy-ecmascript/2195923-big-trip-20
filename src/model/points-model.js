@@ -28,7 +28,7 @@ export default class PointsModel extends Observable {
   }
 
   get destinationIds() {
-    return this.#points.map((point) => point.destination);
+    return this.#sortingPoints.map((point) => point.destination);
   }
 
   async init() {
@@ -61,6 +61,7 @@ export default class PointsModel extends Observable {
         update,
         ...this.#points.slice(index + 1),
       ];
+      this.#sortPoints();
       this._notify(updateType, updatedPoint);
 
     } catch(err) {
@@ -79,6 +80,7 @@ export default class PointsModel extends Observable {
         newPoint,
         ...this.#points,
       ];
+      this.#sortPoints();
       this._notify(updateType, update);
     } catch (err) {
       throw new Error('Can\'t add point');
@@ -98,6 +100,7 @@ export default class PointsModel extends Observable {
         ...this.#points.slice(0, index),
         ...this.#points.slice(index + 1),
       ];
+      this.#sortPoints();
       this._notify(updateType);
     } catch(err) {
       throw new Error('Can\'t delete point');
@@ -105,8 +108,7 @@ export default class PointsModel extends Observable {
   }
 
   #sortPoints() {
-    this.#sortingPoints = this.#points;
-    const sortFunction = Object.values(Sorting).find((sortElement) => sortElement.name === 'day').sort;
-    return this.#sortingPoints.sort(sortFunction);
+    this.#sortingPoints = this.points;
+    this.#sortingPoints.sort(Object.values(Sorting).find((sortElement) => sortElement.name === Sorting.DAY.name).sort);
   }
 }

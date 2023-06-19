@@ -1,5 +1,6 @@
 import FilterView from '../view/filter-view.js';
 import { render, remove } from '../framework/render.js';
+import { UpdateType } from '../const.js';
 
 export default class FilterPresenter {
   #filterComponent = null;
@@ -21,7 +22,7 @@ export default class FilterPresenter {
   }
 
   #filterTypeChangeHandler = (filterType) => {
-    this.#filtersModel.setFilter('MAJOR', filterType);
+    this.#filtersModel.setFilter(UpdateType.MAJOR, filterType);
   };
 
   #newPointButtonStateChangeHandler = () => {
