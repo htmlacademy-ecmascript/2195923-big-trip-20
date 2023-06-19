@@ -1,5 +1,5 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import { sortings } from '../const.js';
+import {Sorting} from '../const.js';
 
 function createSortTemplate() {
   return (
@@ -18,7 +18,7 @@ function createSortElement(sortingElement) {
 
 function createSortingList() {
   let sortTemplate = '';
-  for (const sorting of sortings) {
+  for (const sorting of Object.values(Sorting)) {
     sortTemplate += createSortElement(sorting);
   }
   return sortTemplate;

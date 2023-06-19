@@ -1,8 +1,10 @@
-import { formatDate } from '../utils.js';
-import { DateFormat } from '../const.js';
 import AbstractView from '../framework/view/abstract-view.js';
+import {formatDate} from '../utils.js';
+import {DateFormat} from '../const.js';
 
-const createRouteInTemplate = (routeOfTrip) => routeOfTrip.reduce((acc, pointOfRoute) => `${acc } &mdash; ${ (pointOfRoute === undefined) ? '...' : pointOfRoute}`);
+function createRouteInTemplate(routeOfTrip) {
+  return routeOfTrip.reduce((route, pointOfRoute) => `${route } &mdash; ${ (pointOfRoute === undefined) ? '...' : pointOfRoute}`);
+}
 
 function createTripInfoTemplate(tripStartDate, tripEndDate, totalPrice, routeOfTrip) {
   return (

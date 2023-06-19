@@ -3,12 +3,10 @@ import EmptyPointView from '../view/empty-point-view.js';
 import SortView from '../view/sort-view.js';
 import LoadingView from '../view/loading-view.js';
 import ErrorView from '../view/error-view.js';
-
-import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
-
-import { render, remove, RenderPosition } from '../framework/render.js';
 import PointPresenter from './point-presenter.js';
-import { sortings, UpdateType, UserAction, Mode, Filter, BLANK_POINT, TimeLimit, SERVER_UNAVAILABLE_MESSAGE } from '../const.js';
+import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
+import {render, remove, RenderPosition} from '../framework/render.js';
+import {Sorting, UpdateType, UserAction, Mode, Filter, BLANK_POINT, TimeLimit, SERVER_UNAVAILABLE_MESSAGE} from '../const.js';
 
 export default class PointsListPresenter {
   #pointsListComponent = new PointsListView();
@@ -24,7 +22,7 @@ export default class PointsListPresenter {
 
   #pointPresenters = new Map();
   #creatingPointPresenters = null;
-  #currentSortType = sortings[0].name;
+  #currentSortType = Sorting.DAY.name;
 
   #handleNewPoint = null;
   #handleLoadDataFail = null;
@@ -42,17 +40,17 @@ export default class PointsListPresenter {
     this.#destinationsModel = models.destinationsModel;
     this.#filtersModel = models.filtersModel;
     this.#newPointButtonModel = models.newPointButtonModel;
-    this.#sortComponent = new SortView({onSortTypeChange: this.#handleSortTypeChange});
+    this.#sortComponent = new SortView({onSortTypeChange: this.#sortTypeChangeHandler});
     this.#loadingComponent = new LoadingView();
 
-    this.#pointsModel.addObserver(this.#handleModelEvent);
-    this.#filtersModel.addObserver(this.#handleFiltersEvent);
-    this.#newPointButtonModel.addObserver(this.#handleSortEvent);
+    this.#pointsModel.addObserver(this.#modelEventHandler);
+    this.#filtersModel.addObserver(this.#filtersEventHandler);
+    this.#newPointButtonModel.addObserver(this.#sortEventHandler);
   }
 
   get points() {
-    const filterPoint = this.#pointsModel.points.filter(Filter[this.#filtersModel.filters.toUpperCase()].func);
-    const sortFunction = sortings.find((sortElement) => sortElement.name === this.#currentSortType).func;
+    const filterPoint = this.#pointsModel.points.filter(Filter[this.#filtersModel.filter.toUpperCase()].filter);
+    const sortFunction = Object.values(Sorting).find((sortElement) => sortElement.name === this.#currentSortType).sort;
     return filterPoint.sort(sortFunction);
   }
 
@@ -76,41 +74,13 @@ export default class PointsListPresenter {
     }
   }
 
-  #handleNewPointSaveOrCancel = () => {
-    this.#handleNewPoint();
-    if (!this.points.length) {
-      this.#renderEmptyList();
-    }
-  };
-
-  renderNewPoint = () => {
-    this.#newPointButtonModel.changeStateSwitchButton();
-    if (this.#emptyComponent) {
-      remove(this.#emptyComponent);
-      render(this.#sortComponent, this.#pointsListContainer);
-      render(this.#pointsListComponent, this.#pointsListContainer);
-    }
-    this.#filtersModel.setFilters('PATCH', Filter.EVERYTHING.type);
-    this.#handleSortTypeChange('day', true);
-
-    this.#handleModeChange();
-    this.#creatingPointPresenters = new PointPresenter({
-      pointsListContainer: this.#pointsListComponent,
-      models: {offersModel: this.#offersModel, destinationsModel: this.#destinationsModel},
-      onDataChange: this.#handleViewAction,
-      onModeChange: this.#handleModeChange,
-      onNewPointCreateOrCancel: this.#handleNewPointSaveOrCancel,
-    });
-    this.#creatingPointPresenters.init({point: BLANK_POINT, mode: Mode.CREATE});
-  };
-
   #renderPoint({point, mode}) {
     const pointPresenter = new PointPresenter({
       pointsListContainer: this.#pointsListComponent,
       models: {offersModel: this.#offersModel, destinationsModel: this.#destinationsModel},
-      onDataChange: this.#handleViewAction,
-      onModeChange: this.#handleModeChange,
-      onNewPointCreateOrCancel: this.#handleNewPointSaveOrCancel,
+      onDataChange: this.#viewActionHandler,
+      onModeChange: this.#modeChangeHandler,
+      onNewPointCreateOrCancel: this.#newPointSaveOrCancelHandler,
     });
     pointPresenter.init({point, mode});
     this.#pointPresenters.set(point.id, pointPresenter);
@@ -136,18 +106,77 @@ export default class PointsListPresenter {
     render(this.#loadingComponent, this.#pointsListContainer);
   }
 
+  #renderError(message) {
+    const errorComponent = new ErrorView(message);
+    render(errorComponent, document.body);
+  }
+
+  #renderEmptyFilterMessage(filter) {
+    switch(filter) {
+      case Filter.FUTURE.type:
+        this.#renderEmptyList(Filter.FUTURE.message);
+        break;
+      case Filter.PRESENT.type:
+        this.#renderEmptyList(Filter.PRESENT.message);
+        break;
+      case Filter.PAST.type:
+        this.#renderEmptyList(Filter.PAST.message);
+        break;
+      case Filter.EVERYTHING.type:
+        this.#renderEmptyList(Filter.EVERYTHING.message);
+        break;
+    }
+  }
+
   #clearPointList() {
     this.#pointPresenters.forEach((presenter) => presenter.destroy());
     remove(this.#loadingComponent);
     this.#pointPresenters.clear();
   }
 
-  #handleModeChange = () => {
+  #sortTypeChangeHandler = (sortType, isSaving = false) => {
+    if (this.#currentSortType === sortType && !isSaving) {
+      return;
+    }
+    this.#currentSortType = sortType;
+    this.#clearPointList();
+    this.#renderPointList();
+  };
+
+  #newPointSaveOrCancelHandler = () => {
+    this.#handleNewPoint();
+    if (!this.points.length) {
+      this.#renderEmptyList();
+    }
+  };
+
+  newPointButtonClickHandler = () => {
+    this.#newPointButtonModel.changeStateSwitch();
+    if (this.#emptyComponent) {
+      remove(this.#emptyComponent);
+      render(this.#sortComponent, this.#pointsListContainer);
+      render(this.#pointsListComponent, this.#pointsListContainer);
+    }
+    this.#filtersModel.setFilter('PATCH', Filter.EVERYTHING.type);
+    this.#sortTypeChangeHandler(Sorting.DAY.name, true);
+
+    this.#modeChangeHandler();
+    this.#creatingPointPresenters = new PointPresenter({
+      pointsListContainer: this.#pointsListComponent,
+      models: {offersModel: this.#offersModel, destinationsModel: this.#destinationsModel},
+      onDataChange: this.#viewActionHandler,
+      onModeChange: this.#modeChangeHandler,
+      onNewPointCreateOrCancel: this.#newPointSaveOrCancelHandler,
+    });
+    this.#creatingPointPresenters.init({point: BLANK_POINT, mode: Mode.CREATE});
+  };
+
+  #modeChangeHandler = () => {
     this.#pointPresenters.forEach((presenter) => presenter.resetView());
     this.#creatingPointPresenters?.destroy();
   };
 
-  #handleViewAction = async (actionType, updateType, update) => {
+  #viewActionHandler = async (actionType, updateType, update) => {
     this.#uiBlocker.block();
 
     switch (actionType) {
@@ -157,11 +186,9 @@ export default class PointsListPresenter {
           await this.#pointsModel.updatePoint(updateType, update);
         } catch(err) {
           if (err.message === 'The server is unavailable') {
-            const errorComponent = new ErrorView(SERVER_UNAVAILABLE_MESSAGE);
-            render(errorComponent, document.body);
+            this.#renderError(SERVER_UNAVAILABLE_MESSAGE);
           } else {
-            const errorComponent = new ErrorView(err.message);
-            render(errorComponent, document.body);
+            this.#renderError('Fill in all fields of the form');
           }
           this.#pointPresenters.get(update.id).setAborting();
         } finally {
@@ -174,11 +201,9 @@ export default class PointsListPresenter {
           await this.#pointsModel.addPoint(updateType, update);
         } catch (err) {
           if (err.message === 'The server is unavailable') {
-            const errorComponent = new ErrorView(SERVER_UNAVAILABLE_MESSAGE);
-            render(errorComponent, document.body);
+            this.#renderError(SERVER_UNAVAILABLE_MESSAGE);
           } else {
-            const errorComponent = new ErrorView(err.message);
-            render(errorComponent, document.body);
+            this.#renderError('Fill in all fields of the form');
           }
           this.#creatingPointPresenters.setAborting();
         } finally {
@@ -191,8 +216,7 @@ export default class PointsListPresenter {
           await this.#pointsModel.deletePoint(updateType, update);
         } catch (err) {
           if (err.message === 'The server is unavailable') {
-            const errorComponent = new ErrorView(SERVER_UNAVAILABLE_MESSAGE);
-            render(errorComponent, document.body);
+            this.#renderError(SERVER_UNAVAILABLE_MESSAGE);
           }
           this.#pointPresenters.get(update.id).setAborting();
         } finally {
@@ -202,7 +226,7 @@ export default class PointsListPresenter {
     }
   };
 
-  #handleModelEvent = (updateType, point) => {
+  #modelEventHandler = (updateType, point) => {
     switch (updateType) {
       case UpdateType.PATCH:
         this.#pointPresenters.get(point.id).init({point, mode: Mode.DEFAULT});
@@ -219,7 +243,7 @@ export default class PointsListPresenter {
         } else {
           remove(this.#sortComponent);
           render(this.#pointsListComponent, this.#pointsListContainer);
-          this.#renderEmptyList(Filter[this.#filtersModel.filters.toUpperCase()].message);
+          this.#renderEmptyList(Filter[this.#filtersModel.filter.toUpperCase()].message);
         }
         break;
       case UpdateType.INIT_SUCCESS:
@@ -234,10 +258,11 @@ export default class PointsListPresenter {
         this.#renderEmptyList(SERVER_UNAVAILABLE_MESSAGE);
         this.#handleLoadDataFail.disableNewPointButton();
         this.#handleLoadDataFail.disableFilters();
+        break;
     }
   };
 
-  #handleFiltersEvent = (updateType, filter) => {
+  #filtersEventHandler = (updateType, filter) => {
     switch (updateType) {
       case UpdateType.PATCH:
         this.#sortComponent.setHandlers();
@@ -245,42 +270,23 @@ export default class PointsListPresenter {
       case UpdateType.MINOR:
       case UpdateType.MAJOR:
         this.#clearPointList();
+        remove(this.#sortComponent);
+        remove(this.#emptyComponent);
         if (this.points.length) {
-          remove(this.#emptyComponent);
-          remove(this.#sortComponent);
           render(this.#sortComponent, this.#pointsListContainer);
           this.#sortComponent.setHandlers();
-          this.#handleSortTypeChange('day', true);
+          this.#sortTypeChangeHandler(Sorting.DAY.name, true);
         } else {
-          remove(this.#sortComponent);
-          remove(this.#emptyComponent);
           render(this.#pointsListComponent, this.#pointsListContainer);
-          if (filter === Filter.FUTURE.type) {
-            this.#renderEmptyList(Filter.FUTURE.message);
-          } else if (filter === Filter.PRESENT.type) {
-            this.#renderEmptyList(Filter.PRESENT.message);
-          } else if (filter === Filter.PAST.type) {
-            this.#renderEmptyList(Filter.PAST.message);
-          } else if (filter === Filter.EVERYTHING.type) {
-            this.#renderEmptyList(Filter.EVERYTHING.message);
-          }
+          this.#renderEmptyFilterMessage(filter);
         }
         break;
     }
   };
 
-  #handleSortEvent = () => {
+  #sortEventHandler = () => {
     remove(this.#sortComponent);
     render(this.#sortComponent, this.#pointsListContainer, RenderPosition.AFTERBEGIN);
     this.#sortComponent.setHandlers();
-  };
-
-  #handleSortTypeChange = (sortType, isSaving = false) => {
-    if (this.#currentSortType === sortType && !isSaving) {
-      return;
-    }
-    this.#currentSortType = sortType;
-    this.#clearPointList();
-    this.#renderPointList();
   };
 }

@@ -15,8 +15,4 @@ export default class EmptyPointView extends AbstractView {
   get template() {
     return createEmptyPointTemplate(this.#message);
   }
-
-  removeEmptyPoint() {
-    this.element.remove();
-  }
 }

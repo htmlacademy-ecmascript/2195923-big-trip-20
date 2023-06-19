@@ -1,5 +1,5 @@
 import Observable from '../framework/observable.js';
-import { UpdateType, sortings } from '../const.js';
+import {UpdateType, Sorting} from '../const.js';
 
 export default class PointsModel extends Observable {
   #pointsApiService = null;
@@ -11,29 +11,8 @@ export default class PointsModel extends Observable {
     this.#pointsApiService = pointsApiService;
   }
 
-  async init() {
-    const points = await this.#pointsApiService.points;
-    this.#points = points.map(this.#pointsApiService.adaptToClient);
-    this.#sortPoints();
-    return this.#points;
-  }
-
-  notifySuccessLoad() {
-    this._notify(UpdateType.INIT_SUCCESS);
-  }
-
-  notifyFailLoad() {
-    this._notify(UpdateType.INIT_FAIL);
-  }
-
   get points() {
     return this.#points;
-  }
-
-  #sortPoints() {
-    this.#sortingPoints = this.#points;
-    const sortFunction = sortings.find((sortElement) => sortElement.name === 'day').func;
-    return this.#sortingPoints.sort(sortFunction);
   }
 
   get tripStartDate() {
@@ -50,6 +29,21 @@ export default class PointsModel extends Observable {
 
   get destinationIds() {
     return this.#points.map((point) => point.destination);
+  }
+
+  async init() {
+    const points = await this.#pointsApiService.points;
+    this.#points = points.map(this.#pointsApiService.adaptToClient);
+    this.#sortPoints();
+    return this.#points;
+  }
+
+  notifySuccessLoad() {
+    this._notify(UpdateType.INIT_SUCCESS);
+  }
+
+  notifyFailLoad() {
+    this._notify(UpdateType.INIT_FAIL);
   }
 
   async updatePoint(updateType, update) {
@@ -108,5 +102,11 @@ export default class PointsModel extends Observable {
     } catch(err) {
       throw new Error('Can\'t delete point');
     }
+  }
+
+  #sortPoints() {
+    this.#sortingPoints = this.#points;
+    const sortFunction = Object.values(Sorting).find((sortElement) => sortElement.name === 'day').sort;
+    return this.#sortingPoints.sort(sortFunction);
   }
 }

@@ -1,7 +1,7 @@
 import TripInfoView from '../view/trip-info-view.js';
 import NewPointButtonView from '../view/new-point-button-view.js';
-import { render, remove, RenderPosition } from '../framework/render.js';
-import { UpdateType } from '../const.js';
+import {render, remove, RenderPosition} from '../framework/render.js';
+import {UpdateType} from '../const.js';
 
 export default class TripInfoPresenter {
   #tripInfoContainer = null;
@@ -14,7 +14,7 @@ export default class TripInfoPresenter {
 
   #handlePointCreate = null;
 
-  constructor(tripInfoContainer, models, onPointCreate) {
+  constructor({tripInfoContainer, models, onPointCreate}) {
     this.#tripInfoContainer = tripInfoContainer;
 
     const {pointsModel, destinationsModel, offersModel} = models;
@@ -24,7 +24,7 @@ export default class TripInfoPresenter {
 
     this.#handlePointCreate = onPointCreate;
 
-    this.#pointsModel.addObserver(this.#handleModelEvent);
+    this.#pointsModel.addObserver(this.#modelEventHandler);
   }
 
   get #points() {
@@ -79,7 +79,7 @@ export default class TripInfoPresenter {
   }
 
   #renderNewPointButton() {
-    this.#newPointButtonComponent = new NewPointButtonView({onNewPointButtonClick: this.#handleNewPointButtonClick});
+    this.#newPointButtonComponent = new NewPointButtonView({onNewPointButtonClick: this.#newPointButtonClickHandler});
     render(this.#newPointButtonComponent, this.#tripInfoContainer, RenderPosition.BEFOREEND);
   }
 
@@ -100,7 +100,7 @@ export default class TripInfoPresenter {
     return this.#offersModel.getTotalPriceByTypeAndIds(point.type, point.offers);
   }
 
-  #handleModelEvent = (updateType) => {
+  #modelEventHandler = (updateType) => {
     switch (updateType) {
       case UpdateType.PATCH:
         break;
@@ -117,7 +117,7 @@ export default class TripInfoPresenter {
     }
   };
 
-  #handleNewPointButtonClick = () => {
+  #newPointButtonClickHandler = () => {
     this.#handlePointCreate();
   };
 }

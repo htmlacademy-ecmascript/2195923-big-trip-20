@@ -12,22 +12,22 @@ export default class FilterPresenter {
     this.#filtersModel = models.filtersModel;
     this.#newPointButtonModel = models.newPointButtonModel;
 
-    this.#newPointButtonModel.addObserver(this.#handleNewPointButtonClick);
+    this.#newPointButtonModel.addObserver(this.#newPointButtonStateChangeHandler);
   }
 
   init() {
-    this.#filterComponent = new FilterView({onFilterTypeChange: this.#handleFilterTypeChange});
+    this.#filterComponent = new FilterView({onFilterTypeChange: this.#filterTypeChangeHandler});
     render(this.#filterComponent, this.#filterContainer);
   }
 
-  #handleFilterTypeChange = (filterType) => {
-    this.#filtersModel.setFilters('MAJOR', filterType);
+  #filterTypeChangeHandler = (filterType) => {
+    this.#filtersModel.setFilter('MAJOR', filterType);
   };
 
-  #handleNewPointButtonClick = () => {
+  #newPointButtonStateChangeHandler = () => {
     remove(this.#filterComponent);
     render(this.#filterComponent, this.#filterContainer);
-    this.#filterComponent.setHandlers();
+    this.#filterComponent.init();
   };
 
   disableFilters = () => {

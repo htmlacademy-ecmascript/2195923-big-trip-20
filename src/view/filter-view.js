@@ -47,17 +47,16 @@ export default class FilterView extends AbstractStatefulView {
     return createFilterTemplate(this._state);
   }
 
-  #filterTypeChangeHandler = (evt) => {
-    evt.preventDefault();
-
-    this.#handleFilterTypeChange(evt.target.value);
-  };
-
-  setHandlers() {
-    this.element.addEventListener('change', this.#filterTypeChangeHandler);
+  init() {
+    this._restoreHandlers();
   }
 
   _restoreHandlers() {
     this.element.addEventListener('change', this.#filterTypeChangeHandler);
   }
+
+  #filterTypeChangeHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleFilterTypeChange(evt.target.value);
+  };
 }

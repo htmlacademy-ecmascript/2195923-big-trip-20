@@ -17,11 +17,11 @@ export default class ErrorView extends AbstractView {
     return createErrorTemplate(this.#message);
   }
 
-  removeError() {
+  #removeError() {
     this.element.remove();
   }
 
   #errorMessageClickHandler = () => {
-    this.removeError();
+    this.#removeError();
   };
 }

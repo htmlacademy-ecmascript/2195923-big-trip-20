@@ -1,24 +1,26 @@
-import { DateFormat, Mode, routePointTypes } from '../const.js';
-import { formatDate } from '../utils.js';
-import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import flatpickr from 'flatpickr';
 import he from 'he';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
+import {DateFormat, Mode, RoutePointType} from '../const.js';
+import {formatDate} from '../utils.js';
 
 import 'flatpickr/dist/flatpickr.min.css';
 
-const createDescriptionOfPointInTemplate = (description) => `<p class="event__destination-description">${description}</p>`;
+function createDescriptionOfPointInTemplate(description) {
+  return `<p class="event__destination-description">${description}</p>`;
+}
 
-const createListOfPicturesInTemplate = (pictures) => {
+function createListOfPicturesInTemplate(pictures) {
   let list = '';
   for (const picture of pictures) {
     list += `<img class="event__photo" src="${picture.src}" alt="${picture.description}">`;
   }
   return list;
-};
+}
 
-const createRoutePointTypesInTemplate = (type) => {
+function createRoutePointTypesInTemplate(type) {
   let list = '';
-  for (const point of routePointTypes) {
+  for (const point of Object.values(RoutePointType)) {
     const pointWithFirstCapitalLetter = point[0].toUpperCase() + point.slice(1);
     list += `<div class="event__type-item">
       <input id="event-type-${point}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${point}" ${type === point ? 'checked' : ''}>
@@ -26,17 +28,17 @@ const createRoutePointTypesInTemplate = (type) => {
     </div>`;
   }
   return list;
-};
+}
 
-const createDestinationNamesInTemplate = (destinationsName) => {
+function createDestinationNamesInTemplate(destinationsName) {
   let list = '';
   for (const name of destinationsName) {
     list += `<option value="${name}"></option>`;
   }
   return list;
-};
+}
 
-const createListOfOffersInTemplate = (offersForType, checkedOffers, isDisabled) => {
+function createListOfOffersInTemplate(offersForType, checkedOffers, isDisabled) {
   let list = '';
   for (const offer of offersForType) {
     const lastSectionOfferId = offer.id.split('-').pop();
@@ -52,9 +54,9 @@ const createListOfOffersInTemplate = (offersForType, checkedOffers, isDisabled) 
       </div>`;
   }
   return list;
-};
+}
 
-const createSectionOfOffersInTemplate = (offersForType, checkedOffers, isDisabled) => {
+function createSectionOfOffersInTemplate(offersForType, checkedOffers, isDisabled) {
   if (offersForType?.length) {
     return `
       <section class="event__section  event__section--offers">
@@ -65,9 +67,9 @@ const createSectionOfOffersInTemplate = (offersForType, checkedOffers, isDisable
       </section>`;
   }
   return '';
-};
+}
 
-const createSectionOfDestinationInTemplate = (destination) => {
+function createSectionOfDestinationInTemplate(destination) {
   if (destination === undefined) {
     return '';
   }
@@ -85,16 +87,15 @@ const createSectionOfDestinationInTemplate = (destination) => {
         </div>
       </div>
     </section>`;
-};
+}
 
 function buttonNegativeText(isEdit, isDeleting) {
   if (isEdit && isDeleting) {
     return 'Deleting...';
   } else if (isEdit && !isDeleting) {
     return 'Delete';
-  } else {
-    return 'Cancel';
   }
+  return 'Cancel';
 }
 
 function editPointTemplate(point, destinationsName) {
@@ -183,25 +184,12 @@ export default class EditingView extends AbstractStatefulView {
     this.#allDestinations = allDestinations;
     this.#allOffers = allOffers;
     this.#destinationsName = destinationsName;
-    this._setState(EditingView.parsePointToState({point, offersForType, checkedOffers, destination}));
-
     this.#handleEditFormSubmit = onEditFormSubmit;
     this.#handleEditFormDelete = onEditFormDelete;
     this.#handleEditFormCancel = onEditFormCancel;
 
+    this._setState(EditingView.parsePointToState({point, offersForType, checkedOffers, destination}));
     this._restoreHandlers();
-  }
-
-  _restoreHandlers() {
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#editFormCancelHandler); //закрытие формы по стрелке вверх
-    this.element.querySelector('.event--edit').addEventListener('submit', this.#editFormSubmitHandler); // нажатие на кнопку Save при редактировании
-    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#editFormDeleteHandler); //удаление точки в форме редактирования
-    this.element.querySelector('.event__type-group').addEventListener('change', this.#pointTypeChangeHandler);
-    this.element.querySelector('.event__input--destination').addEventListener('change', this.#pointDestinationChangeHandler);
-    this.element.querySelector('.event__details').addEventListener('change',this.#pointOfferChangeHandler);
-    this.element.querySelector('.event__input--price').addEventListener('change', this.#pointPriceChangeHandler);
-
-    this.#setDatepickers();
   }
 
   get template() {
@@ -219,6 +207,50 @@ export default class EditingView extends AbstractStatefulView {
       this.#datepickerForEndDateAndTime.destroy();
       this.#datepickerForEndDateAndTime = null;
     }
+  }
+
+  reset(point, offersForType, checkedOffers, destination) {
+    this.updateElement(
+      EditingView.parsePointToState({point, offersForType, checkedOffers, destination})
+    );
+  }
+
+  _restoreHandlers() {
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#editFormCancelHandler);
+    this.element.querySelector('.event--edit').addEventListener('submit', this.#editFormSubmitHandler);
+    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#editFormDeleteHandler);
+    this.element.querySelector('.event__type-group').addEventListener('change', this.#pointTypeChangeHandler);
+    this.element.querySelector('.event__input--destination').addEventListener('change', this.#pointDestinationChangeHandler);
+    this.element.querySelector('.event__details').addEventListener('change',this.#pointOfferChangeHandler);
+    this.element.querySelector('.event__input--price').addEventListener('change', this.#pointPriceChangeHandler);
+
+    this.#setDatepickers();
+  }
+
+  #setDatepickers() {
+    this.#datepickerForStartDateAndTime = flatpickr(
+      this.element.querySelector('#event-start-time-1'),
+      {
+        enableTime: true,
+        dateFormat: 'd/m/y H:i',
+        defaultDate: this._state.dateFrom,
+        'time_24hr': true,
+        maxDate: this._state.dateTo,
+        onClose: this.#pointStartDateAndTimeChangeHandler,
+      },
+    );
+
+    this.#datepickerForEndDateAndTime = flatpickr(
+      this.element.querySelector('#event-end-time-1'),
+      {
+        enableTime: true,
+        dateFormat: 'd/m/y H:i',
+        defaultDate: this._state.dateTo,
+        'time_24hr': true,
+        minDate: this._state.dateFrom,
+        onClose: this.#pointEndDateAndTimeChangeHandler,
+      },
+    );
   }
 
   #editFormSubmitHandler = (evt) => {
@@ -289,32 +321,6 @@ export default class EditingView extends AbstractStatefulView {
     });
   };
 
-  #setDatepickers() {
-    this.#datepickerForStartDateAndTime = flatpickr(
-      this.element.querySelector('#event-start-time-1'),
-      {
-        enableTime: true,
-        dateFormat: 'd/m/y H:i',
-        defaultDate: this._state.dateFrom,
-        'time_24hr': true,
-        maxDate: this._state.dateTo,
-        onClose: this.#pointStartDateAndTimeChangeHandler,
-      },
-    );
-
-    this.#datepickerForEndDateAndTime = flatpickr(
-      this.element.querySelector('#event-end-time-1'),
-      {
-        enableTime: true,
-        dateFormat: 'd/m/y H:i',
-        defaultDate: this._state.dateTo,
-        'time_24hr': true,
-        minDate: this._state.dateFrom,
-        onClose: this.#pointEndDateAndTimeChangeHandler,
-      },
-    );
-  }
-
   static parsePointToState({point, offersForType, checkedOffers, destination}) {
     return {...point,
       offers: checkedOffers,
@@ -337,11 +343,5 @@ export default class EditingView extends AbstractStatefulView {
     delete point.isDeleting;
 
     return point;
-  }
-
-  reset(point, offersForType, checkedOffers, destination) {
-    this.updateElement(
-      EditingView.parsePointToState({point, offersForType, checkedOffers, destination})
-    );
   }
 }

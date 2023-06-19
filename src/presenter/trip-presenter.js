@@ -1,6 +1,3 @@
-import { render } from '../framework/render.js';
-import { AUTHORIZATION, END_POINT } from '../const.js';
-
 import PointsApiService from '../api/points-api-service.js';
 import OffersApiService from '../api/offers-api-service.js';
 import DestinationsApiService from '../api/destinations-api-service.js';
@@ -17,10 +14,12 @@ import DestinationsModel from '../model/destinations-model.js';
 import FiltersModel from '../model/filters-model.js';
 import NewPointButtonModel from '../model/new-point-button-model.js';
 
+import {render} from '../framework/render.js';
+import {AUTHORIZATION, END_POINT} from '../const.js';
+
 export default class TripPresenter {
   #tripContainer = null;
   #tripComponent = null;
-  #emptyComponent = null;
 
   constructor({tripContainer}) {
     this.#tripContainer = tripContainer;
@@ -52,16 +51,15 @@ export default class TripPresenter {
         newPointButtonModel: newPointButtonModel
       });
 
-    const onPointCreate = pointsListPresenter.renderNewPoint;
-
-    const tripInfoPresenter = new TripInfoPresenter(
-      this.#tripComponent.tripInfoContainer,
-      {
+    const tripInfoPresenter = new TripInfoPresenter({
+      tripInfoContainer: this.#tripComponent.tripInfoContainer,
+      models: {
         pointsModel: pointsModel,
         destinationsModel: destinationsModel,
         offersModel: offersModel
       },
-      onPointCreate);
+      onPointCreate: pointsListPresenter.newPointButtonClickHandler,
+    });
 
     const filterPresenter = new FilterPresenter(
       this.#tripComponent.tripFiltersContainer, {
@@ -70,13 +68,13 @@ export default class TripPresenter {
       }
     );
 
-    const onNewPointSaveOrCancel = tripInfoPresenter.enableNewPointButton;
-    const onLoadDataFail = {
-      disableNewPointButton: tripInfoPresenter.disableNewPointButton,
-      disableFilters: filterPresenter.disableFilters
-    };
-
-    pointsListPresenter.init({onNewPointSaveOrCancel, onLoadDataFail});
+    pointsListPresenter.init({
+      onNewPointSaveOrCancel: tripInfoPresenter.enableNewPointButton,
+      onLoadDataFail: {
+        disableNewPointButton: tripInfoPresenter.disableNewPointButton,
+        disableFilters: filterPresenter.disableFilters,
+      },
+    });
     tripInfoPresenter.init();
     filterPresenter.init();
   }
