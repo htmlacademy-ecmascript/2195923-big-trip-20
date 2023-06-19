@@ -1,6 +1,7 @@
 import PointView from '../view/point-view.js';
 import EditingView from '../view/editing-view.js';
 import CreatingView from '../view/creating-view.js';
+import ErrorView from '../view/error-view.js';
 import {render, replace, remove, RenderPosition} from '../framework/render.js';
 import {Mode, UserAction, UpdateType} from '../const.js';
 
@@ -210,12 +211,12 @@ export default class PointPresenter {
   }
 
   #isRequiredFiledsFill(point) {
-    const isPositiveIntegerBasePrice = Number.isInteger(point.basePrice) && (point.basePrice > 0);
+    const isIntegerBasePrice = Number.isInteger(point.basePrice);
     function isDate(time) {
       return new Date(time).toString() !== 'Invalid Date';
     }
 
-    if (isPositiveIntegerBasePrice && point.destination && isDate(point.dateFrom) && isDate(point.dateTo)) {
+    if (isIntegerBasePrice && point.destination && isDate(point.dateFrom) && isDate(point.dateTo)) {
       return true;
     }
     return false;
