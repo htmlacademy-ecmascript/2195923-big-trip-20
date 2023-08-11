@@ -145,7 +145,7 @@ export default class PointsListPresenter {
   #newPointSaveOrCancelHandler = () => {
     this.#handleNewPoint();
     if (!this.points.length) {
-      this.#renderEmptyList();
+      this.#renderEmptyList(Filter[this.#filtersModel.filter.toUpperCase()].message);
     }
   };
 
@@ -153,7 +153,9 @@ export default class PointsListPresenter {
     this.#newPointButtonModel.changeStateSwitch();
     if (this.#emptyComponent) {
       remove(this.#emptyComponent);
-      render(this.#sortComponent, this.#pointsListContainer);
+      if (this.points.length) {
+        render(this.#sortComponent, this.#pointsListContainer);
+      }
       render(this.#pointsListComponent, this.#pointsListContainer);
     }
     this.#filtersModel.setFilter(UpdateType.PATCH, Filter.EVERYTHING.type);
@@ -239,6 +241,7 @@ export default class PointsListPresenter {
         this.#clearPointList();
         if (this.points.length) {
           remove(this.#emptyComponent);
+          render(this.#sortComponent, this.#pointsListContainer);
           this.#renderPointList();
         } else {
           remove(this.#sortComponent);
@@ -249,7 +252,9 @@ export default class PointsListPresenter {
       case UpdateType.INIT_SUCCESS:
         this.#isLoading = false;
         remove(this.#loadingComponent);
-        this.#renderSort();
+        if (this.points.length) {
+          this.#renderSort();
+        }
         this.#renderPointList();
         if (!this.points.length) {
           this.#renderEmptyList(Filter.EVERYTHING.message);
@@ -288,8 +293,10 @@ export default class PointsListPresenter {
   };
 
   #sortEventHandler = () => {
-    remove(this.#sortComponent);
-    render(this.#sortComponent, this.#pointsListContainer, RenderPosition.AFTERBEGIN);
-    this.#sortComponent.setHandlers();
+    if (this.points.length) {
+      remove(this.#sortComponent);
+      render(this.#sortComponent, this.#pointsListContainer, RenderPosition.AFTERBEGIN);
+      this.#sortComponent.setHandlers();
+    }
   };
 }

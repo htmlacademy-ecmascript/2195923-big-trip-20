@@ -215,7 +215,7 @@ export default class PointPresenter {
       return new Date(time).toString() !== 'Invalid Date';
     }
 
-    if (isIntegerBasePrice && point.destination && isDate(point.dateFrom) && isDate(point.dateTo)) {
+    if (isIntegerBasePrice && (point.basePrice > 0) && point.destination && isDate(point.dateFrom) && isDate(point.dateTo)) {
       return true;
     }
     return false;
