@@ -71,6 +71,7 @@ export default class PointPresenter {
   }
 
   destroy() {
+    document.removeEventListener('keydown', this.#escKeyDownHandler);
     remove(this.#pointComponent);
     remove(this.#pointEditComponent);
     remove(this.#pointCreateComponent);
@@ -80,6 +81,7 @@ export default class PointPresenter {
     if (this.#mode === Mode.EDIT) {
       this.#pointEditComponent.reset(this.#point, this.#offersForType, this.#checkedOffers, this.#destination);
       this.#replaceEditFormToPoint();
+      document.removeEventListener('keydown', this.#escKeyDownHandler);
     } else if (this.#mode === Mode.CREATE) {
       this.destroy();
     }
