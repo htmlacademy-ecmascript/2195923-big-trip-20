@@ -1,6 +1,7 @@
 import PointView from '../view/point-view.js';
 import EditingView from '../view/editing-view.js';
 import CreatingView from '../view/creating-view.js';
+import ErrorView from '../view/error-view.js';
 import {render, replace, remove, RenderPosition} from '../framework/render.js';
 import {Mode, UserAction, UpdateType} from '../const.js';
 
@@ -211,16 +212,32 @@ export default class PointPresenter {
     remove(this.#prevEditComponent);
   }
 
-  #isRequiredFiledsFill(point) {
+  #renderError(message) {
+    const errorComponent = new ErrorView(message);
+    if (this.#pointEditComponent) {
+      render(errorComponent, this.#pointEditComponent.getHeader());
+    } else if (this.#pointCreateComponent) {
+      render(errorComponent, this.#pointCreateComponent.getHeader());
+    }
+  }
+
+  #validateFieldsFill(point) {
     const isIntegerBasePrice = Number.isInteger(point.basePrice);
     function isDate(time) {
       return new Date(time).toString() !== 'Invalid Date';
     }
-
-    if (isIntegerBasePrice && (point.basePrice > 0) && point.destination && isDate(point.dateFrom) && isDate(point.dateTo)) {
-      return true;
+    if (!isIntegerBasePrice || (point.basePrice <= 0)) {
+      return 'Price must be a positive integer. ';
     }
-    return false;
+
+    if (!point.destination) {
+      return 'You need to specify the destination. ';
+    }
+
+    if (!isDate(point.dateFrom) || !isDate(point.dateTo)) {
+      return 'It is required to specify the dates.';
+    }
+    return '';
   }
 
   #replacePointToEditForm() {
@@ -261,7 +278,9 @@ export default class PointPresenter {
   };
 
   #creatingFormSubmitHandler = (point) => {
-    if (!this.#isRequiredFiledsFill(point)) {
+    const errorMessage = this.#validateFieldsFill(point);
+    if (errorMessage) {
+      this.#renderError(errorMessage);
       return;
     }
 
@@ -280,7 +299,9 @@ export default class PointPresenter {
   };
 
   #editingFormSubmitHandler = (point) => {
-    if (!this.#isRequiredFiledsFill(point)) {
+    const errorMessage = this.#validateFieldsFill(point);
+    if (errorMessage) {
+      this.#renderError(errorMessage);
       return;
     }
 

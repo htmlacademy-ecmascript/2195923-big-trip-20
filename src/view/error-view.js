@@ -10,7 +10,7 @@ export default class ErrorView extends AbstractView {
   constructor(message) {
     super();
     this.#message = message;
-    document.addEventListener('click', this.#errorMessageClickHandler);
+    setTimeout(this.#errorMessageClickHandler, 3000);
   }
 
   get template() {

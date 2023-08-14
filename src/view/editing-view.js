@@ -227,6 +227,10 @@ export default class EditingView extends AbstractStatefulView {
     this.#setDatepickers();
   }
 
+  getHeader() {
+    return this.element.querySelector('.event__header');
+  }
+
   #setDatepickers() {
     this.#datepickerForStartDateAndTime = flatpickr(
       this.element.querySelector('#event-start-time-1'),
