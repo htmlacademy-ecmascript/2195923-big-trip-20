@@ -186,11 +186,7 @@ export default class PointsListPresenter {
         try {
           await this.#pointsModel.updatePoint(updateType, update);
         } catch(err) {
-          if (err.message === 'The server is unavailable') {
-            this.#renderError(SERVER_UNAVAILABLE_MESSAGE);
-          } else {
-            this.#renderError('Fill in all fields of the form');
-          }
+          this.#renderError(SERVER_UNAVAILABLE_MESSAGE);
           this.#pointPresenters.get(update.id).setAborting();
         } finally {
           this.#uiBlocker.unblock();
@@ -201,11 +197,7 @@ export default class PointsListPresenter {
         try {
           await this.#pointsModel.addPoint(updateType, update);
         } catch (err) {
-          if (err.message === 'The server is unavailable') {
-            this.#renderError(SERVER_UNAVAILABLE_MESSAGE);
-          } else {
-            this.#renderError('Fill in all fields of the form');
-          }
+          this.#renderError(SERVER_UNAVAILABLE_MESSAGE);
           this.#creatingPointPresenters.setAborting();
         } finally {
           this.#uiBlocker.unblock();
@@ -216,9 +208,7 @@ export default class PointsListPresenter {
         try {
           await this.#pointsModel.deletePoint(updateType, update);
         } catch (err) {
-          if (err.message === 'The server is unavailable') {
-            this.#renderError(SERVER_UNAVAILABLE_MESSAGE);
-          }
+          this.#renderError(SERVER_UNAVAILABLE_MESSAGE);
           this.#pointPresenters.get(update.id).setAborting();
         } finally {
           this.#uiBlocker.unblock();
